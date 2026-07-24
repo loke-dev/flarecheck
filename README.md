@@ -11,7 +11,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.4.0
+FlareCheck v0.5.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -36,6 +36,7 @@ npx flarecheck --json
 npx flarecheck --strict
 npx flarecheck --list-rules
 npx flarecheck --only FC003,FC005
+npx flarecheck . --all
 ```
 
 Exit codes are designed for CI:
@@ -69,6 +70,21 @@ npx flarecheck --ignore FC002
 
 `--only` and `--ignore` are mutually exclusive, reject unknown rule IDs, and
 accept comma-separated IDs case-insensitively.
+
+### Scan a monorepo
+
+Use `--all` to recursively discover and scan every Wrangler configuration below
+a directory. Common generated directories such as `node_modules`, `dist`,
+`build`, `.wrangler`, and `coverage` are skipped.
+
+```sh
+npx flarecheck . --all
+npx flarecheck ./apps --all --github --strict
+npx flarecheck . --all --json
+```
+
+Human output includes every Worker and an aggregate summary. JSON returns a
+`projects` array, while GitHub output annotates each configuration file.
 
 ## Checks
 

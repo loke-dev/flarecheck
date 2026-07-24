@@ -30,6 +30,20 @@ export interface ScanResult {
   }
 }
 
+export interface MultiScanResult {
+  version: string
+  root: string
+  projects: ScanResult[]
+  summary: {
+    projects: number
+    averageScore: number
+    errors: number
+    warnings: number
+    info: number
+    passed: number
+  }
+}
+
 export type WorkerConfig = Record<string, unknown> & {
   compatibility_date?: string
   compatibility_flags?: unknown

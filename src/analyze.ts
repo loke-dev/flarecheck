@@ -1,8 +1,8 @@
-import { loadConfig, loadPackageScripts } from './config.js'
+import { findConfigPaths, loadConfig, loadPackageScripts } from './config.js'
 import { runChecks } from './rules.js'
-import type { Finding, ScanResult, Severity } from './types.js'
+import type { Finding, MultiScanResult, ScanResult, Severity } from './types.js'
 
-export const VERSION = '0.4.0'
+export const VERSION = '0.5.0'
 
 const PENALTIES: Record<Severity, number> = {
   error: 20,
@@ -48,6 +48,40 @@ export async function analyze(
   return { version: VERSION, configPath, score, findings, passed, summary }
 }
 
+export async function analyzeAll(
+  inputPath: string,
+  options: {
+    now?: Date | undefined
+    only?: string[] | undefined
+    ignore?: string[] | undefined
+  } = {},
+): Promise<MultiScanResult> {
+  const configPaths = await findConfigPaths(inputPath)
+  const projects = await Promise.all(configPaths.map((configPath) => analyze(configPath, options)))
+  const totalScore = projects.reduce((total, project) => total + project.score, 0)
+
+  return {
+    version: VERSION,
+    root: inputPath,
+    projects,
+    summary: {
+      projects: projects.length,
+      averageScore: Math.round(totalScore / projects.length),
+      errors: sumSummary(projects, 'errors'),
+      warnings: sumSummary(projects, 'warnings'),
+      info: sumSummary(projects, 'info'),
+      passed: sumSummary(projects, 'passed'),
+    },
+  }
+}
+
 function countSeverity(findings: Finding[], severity: Severity): number {
   return findings.filter((finding) => finding.severity === severity).length
+}
+
+function sumSummary(
+  projects: ScanResult[],
+  key: keyof ScanResult['summary'],
+): number {
+  return projects.reduce((total, project) => total + project.summary[key], 0)
 }

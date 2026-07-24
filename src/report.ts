@@ -1,6 +1,6 @@
 import pc from 'picocolors'
 import { relative } from 'node:path'
-import type { Finding, ScanResult } from './types.js'
+import type { Finding, MultiScanResult, ScanResult } from './types.js'
 
 export function formatHuman(result: ScanResult, color = true): string {
   const c = createColors(color)
@@ -58,6 +58,24 @@ export function formatGitHub(result: ScanResult, cwd = process.cwd()): string {
       return `::${command} file=${escapeProperty(file)},title=${escapeProperty(title)}::${escapeData(details)}`
     })
     .join('\n')}\n`
+}
+
+export function formatHumanMany(result: MultiScanResult, color = true): string {
+  const c = createColors(color)
+  const projects = result.projects.map((project) => formatHuman(project, color)).join('')
+  const summary = [
+    c.bold(`Scanned ${result.summary.projects} Workers`),
+    `Average readiness: ${formatScore(result.summary.averageScore, c)}`,
+    c.dim(
+      `${result.summary.errors} errors · ${result.summary.warnings} warnings · ${result.summary.info} info · ${result.summary.passed} checks passed`,
+    ),
+    '',
+  ].join('\n')
+  return `${projects}\n${summary}`
+}
+
+export function formatGitHubMany(result: MultiScanResult, cwd = process.cwd()): string {
+  return result.projects.map((project) => formatGitHub(project, cwd)).join('')
 }
 
 function formatFinding(finding: Finding, c: Colors): string[] {

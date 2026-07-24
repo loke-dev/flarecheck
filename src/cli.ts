@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { analyze, VERSION } from './analyze.js'
+import { analyze, analyzeAll, VERSION } from './analyze.js'
 import { ConfigError } from './config.js'
 import { CliArgumentError, parseArgs, wantsJson } from './options.js'
-import { formatGitHub, formatHuman } from './report.js'
+import { formatGitHub, formatGitHubMany, formatHuman, formatHumanMany } from './report.js'
 import { RULES } from './rules.js'
 
 async function main(): Promise<void> {
@@ -29,10 +29,21 @@ async function main(): Promise<void> {
       return
     }
 
-    const result = await analyze(options.inputPath, {
-      only: options.only,
-      ignore: options.ignore,
-    })
+    const analyzeOptions = { only: options.only, ignore: options.ignore }
+    if (options.all) {
+      const result = await analyzeAll(options.inputPath, analyzeOptions)
+      const output =
+        options.format === 'json'
+          ? `${JSON.stringify(result, null, 2)}\n`
+          : options.format === 'github'
+            ? formatGitHubMany(result)
+            : formatHumanMany(result, options.color)
+      process.stdout.write(output)
+      setExitCode(result.summary, options.strict)
+      return
+    }
+
+    const result = await analyze(options.inputPath, analyzeOptions)
     const output =
       options.format === 'json'
         ? `${JSON.stringify(result, null, 2)}\n`
@@ -40,9 +51,7 @@ async function main(): Promise<void> {
           ? formatGitHub(result)
           : formatHuman(result, options.color)
     process.stdout.write(output)
-
-    if (result.summary.errors > 0) process.exitCode = 2
-    else if (options.strict && result.summary.warnings > 0) process.exitCode = 1
+    setExitCode(result.summary, options.strict)
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     if (wantsJson(args)) {
@@ -52,6 +61,14 @@ async function main(): Promise<void> {
     }
     process.exitCode = error instanceof ConfigError || error instanceof CliArgumentError ? 1 : 2
   }
+}
+
+function setExitCode(
+  summary: { errors: number; warnings: number },
+  strict: boolean,
+): void {
+  if (summary.errors > 0) process.exitCode = 2
+  else if (strict && summary.warnings > 0) process.exitCode = 1
 }
 
 function help(): string {
@@ -68,6 +85,7 @@ Options:
   --json       Alias for --format json
   --github     Alias for --format github
   --list-rules List every available rule and exit
+  --all        Recursively scan every Worker below the path
   --only <ids> Run only comma-separated rule IDs
   --ignore <ids>
                Skip comma-separated rule IDs

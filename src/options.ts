@@ -11,6 +11,7 @@ export interface CliOptions {
   only?: string[] | undefined
   ignore: string[]
   listRules: boolean
+  all: boolean
 }
 
 export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR)): CliOptions {
@@ -42,7 +43,7 @@ export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR
       only = parseRuleIds(arg.slice('--only='.length))
     } else if (arg?.startsWith('--ignore=')) {
       ignore = parseRuleIds(arg.slice('--ignore='.length))
-    } else if (arg === '--strict' || arg === '--no-color') {
+    } else if (arg === '--strict' || arg === '--no-color' || arg === '--all') {
       continue
     } else if (arg === '--list-rules') {
       continue
@@ -67,11 +68,17 @@ export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR
     only,
     ignore,
     listRules: args.includes('--list-rules'),
+    all: args.includes('--all'),
   }
 }
 
 export function wantsJson(args: string[]): boolean {
-  return args.includes('--json') || args.includes('--format=json')
+  return args.some(
+    (arg, index) =>
+      arg === '--json' ||
+      arg === '--format=json' ||
+      (arg === '--format' && args[index + 1] === 'json'),
+  )
 }
 
 export class CliArgumentError extends Error {}

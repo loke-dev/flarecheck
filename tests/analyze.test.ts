@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { analyze } from '../src/analyze.js'
+import { analyze, analyzeAll } from '../src/analyze.js'
 
 const fixtures = resolve(import.meta.dirname, 'fixtures')
 const now = new Date('2026-07-24T12:00:00Z')
@@ -91,5 +91,25 @@ describe('analyze', () => {
 
     expect(result.summary.passed).toBe(6)
     expect(result.passed.map((rule) => rule.ruleId)).not.toContain('FC007')
+  })
+
+  it('recursively scans every Worker in a directory', async () => {
+    const result = await analyzeAll(fixtures, { now, only: ['FC003'] })
+
+    expect(result.summary.projects).toBe(4)
+    expect(result.projects.map((project) => project.configPath)).toEqual([
+      resolve(fixtures, 'healthy/wrangler.jsonc'),
+      resolve(fixtures, 'risky/wrangler.jsonc'),
+      resolve(fixtures, 'shared-resource/wrangler.jsonc'),
+      resolve(fixtures, 'toml/wrangler.toml'),
+    ])
+    expect(result.summary).toEqual({
+      projects: 4,
+      averageScore: 95,
+      errors: 1,
+      warnings: 0,
+      info: 0,
+      passed: 3,
+    })
   })
 })

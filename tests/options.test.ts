@@ -12,12 +12,14 @@ describe('parseArgs', () => {
       only: undefined,
       ignore: [],
       listRules: false,
+      all: false,
     })
   })
 
   it('supports equals syntax and JSON error detection', () => {
     expect(parseArgs(['--format=json'], false).format).toBe('json')
     expect(wantsJson(['--format=json'])).toBe(true)
+    expect(wantsJson(['--format', 'json'])).toBe(true)
   })
 
   it('rejects unknown formats and options', () => {
@@ -34,6 +36,7 @@ describe('parseArgs', () => {
   it('parses and normalizes rule selection', () => {
     expect(parseArgs(['--only', 'fc001, FC003']).only).toEqual(['FC001', 'FC003'])
     expect(parseArgs(['--ignore=fc007,fc008']).ignore).toEqual(['FC007', 'FC008'])
+    expect(parseArgs(['./apps', '--all']).all).toBe(true)
   })
 
   it('rejects unknown, empty, and conflicting rule selection', () => {

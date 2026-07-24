@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import { statSync } from 'node:fs'
 import { resolve, basename, dirname, join } from 'node:path'
 import { parse as parseJsonc, printParseErrorCode, type ParseError } from 'jsonc-parser'
@@ -6,6 +6,14 @@ import { parse as parseToml } from 'smol-toml'
 import type { WorkerConfig } from './types.js'
 
 const CONFIG_NAMES = ['wrangler.jsonc', 'wrangler.json', 'wrangler.toml'] as const
+const IGNORED_DIRECTORIES = new Set([
+  '.git',
+  '.wrangler',
+  'build',
+  'coverage',
+  'dist',
+  'node_modules',
+])
 
 export class ConfigError extends Error {}
 
@@ -61,6 +69,36 @@ function findConfigInDirectory(directory: string): string | undefined {
     if (statSync(candidate, { throwIfNoEntry: false })?.isFile()) return candidate
   }
   return undefined
+}
+
+export async function findConfigPaths(inputPath: string): Promise<string[]> {
+  const absolute = resolve(inputPath)
+  const input = statSync(absolute, { throwIfNoEntry: false })
+  if (!input) throw new ConfigError(`Path does not exist: ${absolute}`)
+  if (!input.isDirectory()) return [absolute]
+
+  const configPaths: string[] = []
+  await findConfigsRecursively(absolute, configPaths)
+  if (configPaths.length === 0) {
+    throw new ConfigError(
+      `No Wrangler configuration found below ${absolute}. Expected ${CONFIG_NAMES.join(', ')}.`,
+    )
+  }
+  return configPaths
+}
+
+async function findConfigsRecursively(directory: string, configPaths: string[]): Promise<void> {
+  const entries = await readdir(directory, { withFileTypes: true })
+  const names = new Set(entries.filter((entry) => entry.isFile()).map((entry) => entry.name))
+  const configName = CONFIG_NAMES.find((name) => names.has(name))
+  if (configName) configPaths.push(join(directory, configName))
+
+  const childDirectories = entries
+    .filter((entry) => entry.isDirectory() && !IGNORED_DIRECTORIES.has(entry.name))
+    .sort((left, right) => left.name.localeCompare(right.name))
+  for (const child of childDirectories) {
+    await findConfigsRecursively(join(directory, child.name), configPaths)
+  }
 }
 
 function errorMessage(error: unknown): string {
