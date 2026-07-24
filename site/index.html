@@ -36,7 +36,7 @@
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
         "description": "An open-source command-line checker for Cloudflare Workers configuration risks.",
-        "softwareVersion": "0.3.0",
+        "softwareVersion": "0.4.0",
         "license": "https://opensource.org/license/mit",
         "codeRepository": "https://github.com/loke-dev/flarecheck",
         "author": {
@@ -78,6 +78,14 @@
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "Yes. FlareCheck provides JSON output, deterministic checks, and exit codes for errors and strict warning handling."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I select which FlareCheck rules run?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. List stable rule IDs with --list-rules, run a subset with --only, or skip specific checks with --ignore."
             }
           }
         ]
@@ -180,7 +188,7 @@
         </div>
         <div class="receipt" aria-label="Example terminal output">
           <div class="receipt-top">
-            <span>FLARECHECK / v0.3.0</span>
+            <span>FLARECHECK / v0.4.0</span>
             <span>wrangler.jsonc</span>
           </div>
           <pre><code><span>$</span> flarecheck
@@ -253,6 +261,10 @@ staging is missing d1_databases
           <code>flarecheck --strict</code>
           <p>File annotations in Actions</p>
           <code>flarecheck --github --strict</code>
+          <p>Discover every stable rule ID</p>
+          <code>flarecheck --list-rules</code>
+          <p>Adopt a focused rule set</p>
+          <code>flarecheck --only FC003,FC005</code>
         </div>
       </section>
 
@@ -274,7 +286,11 @@ staging is missing d1_databases
             </details>
             <details>
               <summary>Can I run it in CI?</summary>
-              <p>Yes. Use <code>--json</code> for structured output and <code>--strict</code> to fail on warnings as well as errors.</p>
+              <p>Yes. Use <code>--github</code> for file annotations, <code>--json</code> for structured output, and <code>--strict</code> to fail on warnings.</p>
+            </details>
+            <details>
+              <summary>Can I select which rules run?</summary>
+              <p>Yes. List stable IDs with <code>--list-rules</code>, run a focused subset with <code>--only</code>, or skip specific checks with <code>--ignore</code>.</p>
             </details>
             <details>
               <summary>Does it replace Wrangler validation?</summary>

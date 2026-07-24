@@ -4,6 +4,7 @@ import { analyze, VERSION } from './analyze.js'
 import { ConfigError } from './config.js'
 import { CliArgumentError, parseArgs, wantsJson } from './options.js'
 import { formatGitHub, formatHuman } from './report.js'
+import { RULES } from './rules.js'
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
@@ -19,7 +20,19 @@ async function main(): Promise<void> {
 
   try {
     const options = parseArgs(args)
-    const result = await analyze(options.inputPath)
+    if (options.listRules) {
+      process.stdout.write(
+        options.format === 'json'
+          ? `${JSON.stringify(RULES.map(({ id, title }) => ({ id, title })), null, 2)}\n`
+          : `${RULES.map((rule) => `${rule.id}  ${rule.title}`).join('\n')}\n`,
+      )
+      return
+    }
+
+    const result = await analyze(options.inputPath, {
+      only: options.only,
+      ignore: options.ignore,
+    })
     const output =
       options.format === 'json'
         ? `${JSON.stringify(result, null, 2)}\n`
@@ -54,6 +67,10 @@ Options:
                Select terminal, JSON, or GitHub Actions output
   --json       Alias for --format json
   --github     Alias for --format github
+  --list-rules List every available rule and exit
+  --only <ids> Run only comma-separated rule IDs
+  --ignore <ids>
+               Skip comma-separated rule IDs
   --strict     Exit with code 1 when warnings are found
   --no-color   Disable ANSI colors
   -v, --version

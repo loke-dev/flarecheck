@@ -42,21 +42,50 @@ export interface RuleContext {
   now: Date
 }
 
-export function runChecks(context: RuleContext): CheckResult[] {
-  return [
-    checkCompatibilityDate(context),
-    checkNodeCompatibility(context),
-    checkSecretsInVars(context),
-    checkObservability(context),
-    checkEnvironmentBindings(context),
-    checkDeployCommand(context),
-    checkConfigFormat(context),
-    checkSharedEnvironmentResources(context),
-  ]
+export interface RuleDefinition {
+  id: string
+  title: string
+  check: (context: RuleContext) => CheckResult
+}
+
+export interface RuleSelection {
+  only?: string[] | undefined
+  ignore?: string[] | undefined
+}
+
+const RULE_TITLES = {
+  FC001: 'Compatibility date is current',
+  FC002: 'Node.js compatibility is enabled',
+  FC003: 'No likely secrets are committed in vars',
+  FC004: 'Production observability is configured',
+  FC005: 'Every environment declares its bindings',
+  FC006: 'Deploy commands select an environment',
+  FC007: 'Wrangler uses the recommended JSONC format',
+  FC008: 'Production resources are isolated by environment',
+} as const
+
+export const RULES: RuleDefinition[] = [
+  { id: 'FC001', title: RULE_TITLES.FC001, check: checkCompatibilityDate },
+  { id: 'FC002', title: RULE_TITLES.FC002, check: checkNodeCompatibility },
+  { id: 'FC003', title: RULE_TITLES.FC003, check: checkSecretsInVars },
+  { id: 'FC004', title: RULE_TITLES.FC004, check: checkObservability },
+  { id: 'FC005', title: RULE_TITLES.FC005, check: checkEnvironmentBindings },
+  { id: 'FC006', title: RULE_TITLES.FC006, check: checkDeployCommand },
+  { id: 'FC007', title: RULE_TITLES.FC007, check: checkConfigFormat },
+  { id: 'FC008', title: RULE_TITLES.FC008, check: checkSharedEnvironmentResources },
+]
+
+export function runChecks(context: RuleContext, selection: RuleSelection = {}): CheckResult[] {
+  const only = selection.only ? new Set(selection.only) : undefined
+  const ignored = new Set(selection.ignore ?? [])
+
+  return RULES.filter((rule) => (!only || only.has(rule.id)) && !ignored.has(rule.id)).map(
+    (rule) => rule.check(context),
+  )
 }
 
 function checkCompatibilityDate({ config, configPath, now }: RuleContext): CheckResult {
-  const title = 'Compatibility date is current'
+  const title = RULE_TITLES.FC001
   const value = config.compatibility_date
   if (typeof value !== 'string') {
     return result('FC001', title, [
@@ -98,7 +127,7 @@ function checkCompatibilityDate({ config, configPath, now }: RuleContext): Check
 }
 
 function checkNodeCompatibility({ config, configPath }: RuleContext): CheckResult {
-  const title = 'Node.js compatibility is enabled'
+  const title = RULE_TITLES.FC002
   const flags = Array.isArray(config.compatibility_flags) ? config.compatibility_flags : []
   if (!flags.includes('nodejs_compat')) {
     return result('FC002', title, [
@@ -119,7 +148,7 @@ function checkNodeCompatibility({ config, configPath }: RuleContext): CheckResul
 }
 
 function checkSecretsInVars({ config, configPath }: RuleContext): CheckResult {
-  const title = 'No likely secrets are committed in vars'
+  const title = RULE_TITLES.FC003
   const findings: Finding[] = []
   inspectVars(config.vars, 'vars', configPath, findings)
 
@@ -168,7 +197,7 @@ function inspectVars(
 }
 
 function checkObservability({ config, configPath }: RuleContext): CheckResult {
-  const title = 'Production observability is configured'
+  const title = RULE_TITLES.FC004
   const observability = asRecord(config.observability)
   if (!observability || observability.enabled !== true) {
     return result('FC004', title, [
@@ -207,7 +236,7 @@ function checkObservability({ config, configPath }: RuleContext): CheckResult {
 }
 
 function checkEnvironmentBindings({ config, configPath }: RuleContext): CheckResult {
-  const title = 'Every environment declares its bindings'
+  const title = RULE_TITLES.FC005
   const environments = asRecord(config.env)
   if (!environments || Object.keys(environments).length === 0) return result('FC005', title)
 
@@ -240,7 +269,7 @@ function checkEnvironmentBindings({ config, configPath }: RuleContext): CheckRes
 }
 
 function checkDeployCommand({ config, configPath, scripts }: RuleContext): CheckResult {
-  const title = 'Deploy commands select an environment'
+  const title = RULE_TITLES.FC006
   const environments = asRecord(config.env)
   if (!environments || Object.keys(environments).length === 0) return result('FC006', title)
 
@@ -270,7 +299,7 @@ function checkDeployCommand({ config, configPath, scripts }: RuleContext): Check
 }
 
 function checkConfigFormat({ configPath }: RuleContext): CheckResult {
-  const title = 'Wrangler uses the recommended JSONC format'
+  const title = RULE_TITLES.FC007
   if (basename(configPath) === 'wrangler.toml') {
     return result('FC007', title, [
       finding(
@@ -304,7 +333,7 @@ const STATEFUL_RESOURCES: ResourceType[] = [
 ]
 
 function checkSharedEnvironmentResources({ config, configPath }: RuleContext): CheckResult {
-  const title = 'Production resources are isolated by environment'
+  const title = RULE_TITLES.FC008
   const environments = asRecord(config.env)
   const production = asRecord(environments?.production)
   if (!environments || !production) return result('FC008', title)

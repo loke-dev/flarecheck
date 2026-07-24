@@ -67,4 +67,29 @@ describe('analyze', () => {
     })
     expect(result.findings[0]?.message).toContain('env.production')
   })
+
+  it('can run only selected rules', async () => {
+    const result = await analyze(resolve(fixtures, 'risky'), {
+      now,
+      only: ['FC003', 'FC006'],
+    })
+
+    expect(result.findings.map((finding) => finding.ruleId)).toEqual(['FC003', 'FC006'])
+    expect(result.summary).toEqual({
+      errors: 1,
+      warnings: 1,
+      info: 0,
+      passed: 0,
+    })
+  })
+
+  it('can ignore selected rules', async () => {
+    const result = await analyze(resolve(fixtures, 'healthy'), {
+      now,
+      ignore: ['FC007', 'FC008'],
+    })
+
+    expect(result.summary.passed).toBe(6)
+    expect(result.passed.map((rule) => rule.ruleId)).not.toContain('FC007')
+  })
 })

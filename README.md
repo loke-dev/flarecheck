@@ -11,7 +11,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.3.0
+FlareCheck v0.4.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -34,6 +34,8 @@ npx flarecheck
 npx flarecheck ./apps/api
 npx flarecheck --json
 npx flarecheck --strict
+npx flarecheck --list-rules
+npx flarecheck --only FC003,FC005
 ```
 
 Exit codes are designed for CI:
@@ -54,7 +56,21 @@ workflow run:
 
 `--github` is a shorter alias for `--format github`.
 
-## Checks in v0.2
+### Adopt rules incrementally
+
+List the stable rule IDs, run a focused subset, or temporarily skip rules that
+are not relevant to a project:
+
+```sh
+npx flarecheck --list-rules
+npx flarecheck --only FC003,FC005
+npx flarecheck --ignore FC002
+```
+
+`--only` and `--ignore` are mutually exclusive, reject unknown rule IDs, and
+accept comma-separated IDs case-insensitively.
+
+## Checks
 
 | Rule | Check |
 | --- | --- |

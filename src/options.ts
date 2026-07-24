@@ -1,4 +1,5 @@
 import { resolve } from 'node:path'
+import { RULES } from './rules.js'
 
 export type OutputFormat = 'human' | 'json' | 'github'
 
@@ -7,12 +8,17 @@ export interface CliOptions {
   format: OutputFormat
   strict: boolean
   color: boolean
+  only?: string[] | undefined
+  ignore: string[]
+  listRules: boolean
 }
 
 export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR)): CliOptions {
   let format: OutputFormat = 'human'
   let inputPath = '.'
   let hasInputPath = false
+  let only: string[] | undefined
+  let ignore: string[] = []
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index]
@@ -25,7 +31,20 @@ export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR
       index += 1
     } else if (arg?.startsWith('--format=')) {
       format = parseFormat(arg.slice('--format='.length))
+    } else if (arg === '--only' || arg === '--ignore') {
+      const value = args[index + 1]
+      if (!value) throw new CliArgumentError(`${arg} requires a comma-separated rule list.`)
+      const ruleIds = parseRuleIds(value)
+      if (arg === '--only') only = ruleIds
+      else ignore = ruleIds
+      index += 1
+    } else if (arg?.startsWith('--only=')) {
+      only = parseRuleIds(arg.slice('--only='.length))
+    } else if (arg?.startsWith('--ignore=')) {
+      ignore = parseRuleIds(arg.slice('--ignore='.length))
     } else if (arg === '--strict' || arg === '--no-color') {
+      continue
+    } else if (arg === '--list-rules') {
       continue
     } else if (arg?.startsWith('-')) {
       throw new CliArgumentError(`Unknown option "${arg}".`)
@@ -36,11 +55,18 @@ export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR
     }
   }
 
+  if (only && ignore.length > 0) {
+    throw new CliArgumentError('--only and --ignore cannot be used together.')
+  }
+
   return {
     inputPath: resolve(inputPath),
     format,
     strict: args.includes('--strict'),
     color: !args.includes('--no-color') && !noColor,
+    only,
+    ignore,
+    listRules: args.includes('--list-rules'),
   }
 }
 
@@ -53,4 +79,20 @@ export class CliArgumentError extends Error {}
 function parseFormat(value: string): OutputFormat {
   if (value === 'human' || value === 'json' || value === 'github') return value
   throw new CliArgumentError(`Unknown output format "${value}". Use human, json, or github.`)
+}
+
+function parseRuleIds(value: string): string[] {
+  const knownRuleIds = new Set(RULES.map((rule) => rule.id))
+  const ruleIds = [...new Set(value.split(',').map((ruleId) => ruleId.trim().toUpperCase()))]
+  if (ruleIds.length === 0 || ruleIds.some((ruleId) => ruleId.length === 0)) {
+    throw new CliArgumentError('Rule lists cannot be empty.')
+  }
+
+  const unknownRuleIds = ruleIds.filter((ruleId) => !knownRuleIds.has(ruleId))
+  if (unknownRuleIds.length > 0) {
+    throw new CliArgumentError(
+      `Unknown rule ${unknownRuleIds.join(', ')}. Run --list-rules to see available rules.`,
+    )
+  }
+  return ruleIds
 }
