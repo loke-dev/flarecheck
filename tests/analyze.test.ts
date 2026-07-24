@@ -15,7 +15,7 @@ describe('analyze', () => {
       errors: 0,
       warnings: 0,
       info: 0,
-      passed: 7,
+      passed: 8,
     })
   })
 
@@ -27,7 +27,7 @@ describe('analyze', () => {
       errors: 1,
       warnings: 5,
       info: 0,
-      passed: 1,
+      passed: 2,
     })
     expect(result.findings.map((finding) => finding.ruleId)).toEqual([
       'FC001',
@@ -48,5 +48,23 @@ describe('analyze', () => {
     expect(result.score).toBe(100)
     expect(result.summary.info).toBe(1)
     expect(result.findings[0]?.ruleId).toBe('FC007')
+  })
+
+  it('finds stateful resources shared with production', async () => {
+    const result = await analyze(resolve(fixtures, 'shared-resource'), { now })
+
+    expect(result.score).toBe(92)
+    expect(result.summary).toEqual({
+      errors: 0,
+      warnings: 1,
+      info: 0,
+      passed: 7,
+    })
+    expect(result.findings[0]).toMatchObject({
+      ruleId: 'FC008',
+      severity: 'warning',
+      title: 'staging shares a production D1 database',
+    })
+    expect(result.findings[0]?.message).toContain('env.production')
   })
 })

@@ -11,7 +11,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.1.0
+FlareCheck v0.2.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -49,7 +49,7 @@ Exit codes are designed for CI:
 - `1`: invalid configuration, or warnings with `--strict`
 - `2`: production-readiness errors
 
-## Checks in v0.1
+## Checks in v0.2
 
 | Rule | Check |
 | --- | --- |
@@ -60,6 +60,7 @@ Exit codes are designed for CI:
 | `FC005` | Every environment declares its non-inherited bindings |
 | `FC006` | Deployment scripts select a configured environment |
 | `FC007` | Wrangler uses Cloudflare's recommended JSONC format |
+| `FC008` | Non-production environments do not share stateful production resources |
 
 Rules are deterministic, documented, and designed to favor useful findings over
 volume. FlareCheck never uploads source code or requires Cloudflare credentials.

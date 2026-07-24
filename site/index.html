@@ -5,144 +5,302 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Catch Cloudflare Workers configuration risks before they reach production."
+      content="FlareCheck is the open-source Cloudflare Workers config checker. Find environment drift, committed secrets, unsafe deploy scripts, and missing observability before production."
     />
-    <meta name="theme-color" content="#0b0b0c" />
-    <meta property="og:title" content="FlareCheck — Know before you deploy" />
+    <meta name="theme-color" content="#f04b23" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta property="og:title" content="FlareCheck — Preflight checks for Cloudflare Workers" />
     <meta
       property="og:description"
-      content="Production-readiness checks for Cloudflare Workers projects."
+      content="Scan wrangler.jsonc for production risks in one local command. No account and no source upload."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://flarecheck.loke.dev" />
-    <link rel="canonical" href="https://flarecheck.loke.dev" />
-    <title>FlareCheck — Know before you deploy</title>
+    <meta property="og:url" content="https://flarecheck.loke.dev/" />
+    <meta property="og:site_name" content="FlareCheck" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="FlareCheck — Know before you deploy" />
+    <meta
+      name="twitter:description"
+      content="Open-source production-readiness checks for Cloudflare Workers."
+    />
+    <link rel="canonical" href="https://flarecheck.loke.dev/" />
+    <title>Cloudflare Workers Config Checker — FlareCheck</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "FlareCheck",
+        "url": "https://flarecheck.loke.dev/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Linux, macOS, Windows",
+        "description": "An open-source command-line checker for Cloudflare Workers configuration risks.",
+        "softwareVersion": "0.2.0",
+        "license": "https://opensource.org/license/mit",
+        "codeRepository": "https://github.com/loke-dev/flarecheck",
+        "author": {
+          "@type": "Person",
+          "name": "Loke",
+          "url": "https://loke.dev/"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What does FlareCheck inspect?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "FlareCheck reads your Wrangler configuration and package scripts to find high-confidence Cloudflare Workers deployment risks."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does FlareCheck upload my source code?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. FlareCheck runs locally and does not require an account or upload project files."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I run FlareCheck in CI?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. FlareCheck provides JSON output, deterministic checks, and exit codes for errors and strict warning handling."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <div class="grain" aria-hidden="true"></div>
-    <header class="shell nav">
+    <a class="skip-link" href="#content">Skip to content</a>
+    <div class="paper-noise" aria-hidden="true"></div>
+
+    <header class="site-header">
       <a class="brand" href="/" aria-label="FlareCheck home">
-        <span class="mark" aria-hidden="true">F</span>
-        <span>FlareCheck</span>
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>FLARECHECK</span>
       </a>
+      <p class="issue">PUBLIC BUILD / 002</p>
       <nav aria-label="Primary">
-        <a href="#checks">Checks</a>
-        <a href="https://github.com/loke-dev/flarecheck">GitHub</a>
+        <a href="#rules">Rules</a>
+        <a href="#how">How it works</a>
+        <a href="https://github.com/loke-dev/flarecheck">GitHub ↗</a>
       </nav>
     </header>
 
-    <main>
-      <section class="shell hero">
-        <div class="eyebrow"><span></span> Open source · Local first</div>
-        <h1>Know before<br />you <em>deploy.</em></h1>
-        <p class="lede">
-          FlareCheck catches Cloudflare Workers configuration risks that builds,
-          type checks, and local development cannot see.
-        </p>
-        <div class="actions">
-          <button class="install" type="button" data-copy="npx github:loke-dev/flarecheck">
-            <span aria-hidden="true">$</span>
-            <code>npx github:loke-dev/flarecheck</code>
-            <span class="copy-label">Copy</span>
-          </button>
-          <a class="secondary" href="https://github.com/loke-dev/flarecheck">
-            View source <span aria-hidden="true">↗</span>
-          </a>
+    <main id="content">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="kicker">Cloudflare Workers / preflight inspection</p>
+          <h1>Catch the config bug <em>before prod does.</em></h1>
+          <p class="lede">
+            FlareCheck scans <code>wrangler.jsonc</code> for environment drift,
+            committed secrets, blind deploys, and missing production evidence.
+          </p>
+          <div class="hero-actions">
+            <button class="command" type="button" data-copy="npx github:loke-dev/flarecheck">
+              <span class="prompt" aria-hidden="true">$</span>
+              <code>npx github:loke-dev/flarecheck</code>
+              <span class="copy-label">COPY</span>
+            </button>
+            <a class="text-link" href="https://github.com/loke-dev/flarecheck">
+              Read the source <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+          <ul class="hero-facts" aria-label="Product facts">
+            <li><b>00</b><span>accounts</span></li>
+            <li><b>00</b><span>uploads</span></li>
+            <li><b>08</b><span>rules</span></li>
+          </ul>
         </div>
-        <div class="terminal-wrap">
-          <div class="terminal-glow" aria-hidden="true"></div>
-          <div class="terminal" aria-label="Example FlareCheck output">
-            <div class="terminal-bar">
-              <span></span><span></span><span></span>
-              <p>~/projects/worker</p>
-            </div>
-            <div class="terminal-body">
-              <p><b>$</b> npx github:loke-dev/flarecheck</p>
-              <p class="space"><strong>FlareCheck</strong> <i>v0.1.0</i></p>
-              <p class="muted">wrangler.jsonc</p>
-              <p class="space">Production readiness: <mark>72/100</mark></p>
-              <p class="space error">✗ ERROR <i>FC003</i> <strong>Likely secret committed as API_KEY</strong></p>
-              <p class="indent muted">vars.API_KEY looks sensitive and will be stored in source control.</p>
-              <p class="indent fix">Fix: Store it with wrangler secret put API_KEY.</p>
-              <p class="space warning">! WARNING <i>FC005</i> <strong>staging is missing bindings</strong></p>
-              <p class="indent muted">d1_databases is not inherited by env.staging.</p>
-              <p class="space muted">1 error · 2 warnings · 4 checks passed</p>
-            </div>
+
+        <div class="scanner" aria-label="Example scan result: 92 out of 100, one warning">
+          <div class="scanner-head">
+            <span>FC / DIAGNOSTIC</span>
+            <span>READY</span>
+          </div>
+          <div class="dial">
+            <span class="orbit orbit-one"></span>
+            <span class="orbit orbit-two"></span>
+            <span class="sweep"></span>
+            <span class="crosshair crosshair-x"></span>
+            <span class="crosshair crosshair-y"></span>
+            <div class="score"><b>92</b><span>/ 100</span></div>
+            <i class="blip blip-one"></i>
+            <i class="blip blip-two"></i>
+            <i class="blip blip-three"></i>
+          </div>
+          <div class="scanner-result">
+            <p><span class="status-dot"></span> SCAN COMPLETE</p>
+            <dl>
+              <div><dt>ERROR</dt><dd>00</dd></div>
+              <div><dt>WARNING</dt><dd>01</dd></div>
+              <div><dt>PASSED</dt><dd>07</dd></div>
+            </dl>
           </div>
         </div>
       </section>
 
-      <section class="proof">
-        <div class="shell proof-grid">
-          <p>Built for the gap between</p>
-          <div><span>Build passed</span><b>→</b><span>Production ready</span></div>
+      <div class="signal-strip" aria-hidden="true">
+        <div>
+          <span>CONFIG LOADED</span><i>◆</i>
+          <span>BINDINGS MAPPED</span><i>◆</i>
+          <span>SECRETS CHECKED</span><i>◆</i>
+          <span>DEPLOY PATH VERIFIED</span><i>◆</i>
+          <span>CONFIG LOADED</span><i>◆</i>
+          <span>BINDINGS MAPPED</span>
+        </div>
+      </div>
+
+      <section class="inspection">
+        <div class="section-label">
+          <span>01</span>
+          <p>Why another check?</p>
+        </div>
+        <div class="inspection-copy">
+          <h2>A green build only proves the code can build.</h2>
+          <p>
+            Wrangler configuration decides which databases, routes, secrets, runtime
+            behavior, and logs your Worker gets after deployment. FlareCheck checks
+            that layer before a typo becomes an incident.
+          </p>
+        </div>
+        <div class="receipt" aria-label="Example terminal output">
+          <div class="receipt-top">
+            <span>FLARECHECK / v0.2.0</span>
+            <span>wrangler.jsonc</span>
+          </div>
+          <pre><code><span>$</span> flarecheck
+
+PRODUCTION READINESS     <b>72/100</b>
+
+<mark>✕ ERROR   FC003</mark>
+Likely secret committed as API_KEY
+<i>→ wrangler secret put API_KEY</i>
+
+<strong>! WARNING FC005</strong>
+staging is missing d1_databases
+<i>→ declare it in env.staging</i>
+
+1 error · 2 warnings · 5 passed</code></pre>
+          <p class="receipt-foot">EXIT 02 / ACTION REQUIRED</p>
         </div>
       </section>
 
-      <section class="shell checks" id="checks">
-        <div class="section-heading">
-          <p class="eyebrow"><span></span> High-signal checks</p>
-          <h2>Small mistakes.<br /><em>Real incidents.</em></h2>
+      <section class="rules-section" id="rules">
+        <div class="section-label light">
+          <span>02</span>
+          <p>Cloudflare Workers checks</p>
         </div>
-        <div class="check-grid">
-          <article>
-            <span>01</span>
-            <h3>Environment drift</h3>
-            <p>Find bindings and variables that disappear in staging because Wrangler does not inherit them.</p>
-            <code>FC005</code>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Committed secrets</h3>
-            <p>Catch likely credentials stored in vars before configuration reaches source control.</p>
-            <code>FC003</code>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Blind deployments</h3>
-            <p>Spot deploy scripts that target the root Worker instead of an explicit production environment.</p>
-            <code>FC006</code>
-          </article>
-          <article>
-            <span>04</span>
-            <h3>Missing evidence</h3>
-            <p>Verify that logs, compatibility behavior, and production sampling are configured deliberately.</p>
-            <code>FC001 · FC004</code>
-          </article>
+        <div class="rules-heading">
+          <h2>Eight opinions.<br />All inspectable.</h2>
+          <p>
+            Every FlareCheck finding has a stable rule ID, an explanation, a suggested
+            fix, and a link to the relevant Cloudflare documentation.
+          </p>
+        </div>
+        <ol class="rule-list">
+          <li><span>FC001</span><h3>Compatibility date</h3><p>Find a missing, invalid, or stale compatibility date.</p><b>RUNTIME</b></li>
+          <li><span>FC002</span><h3>Node.js compatibility</h3><p>Flag projects that may fail when a dependency expects Node built-ins.</p><b>RUNTIME</b></li>
+          <li><span>FC003</span><h3>Committed secrets</h3><p>Detect likely credentials stored in plain-text Wrangler vars.</p><b>SECURITY</b></li>
+          <li><span>FC004</span><h3>Production observability</h3><p>Check that Workers Logs and intentional sampling are configured.</p><b>EVIDENCE</b></li>
+          <li><span>FC005</span><h3>Environment drift</h3><p>Find bindings omitted from environments because they are not inherited.</p><b>CONFIG</b></li>
+          <li><span>FC006</span><h3>Explicit deploy target</h3><p>Catch deployment scripts that can accidentally target the root Worker.</p><b>RELEASE</b></li>
+          <li><span>FC007</span><h3>Modern config format</h3><p>Recommend JSONC when a project still uses Wrangler TOML.</p><b>MAINTENANCE</b></li>
+          <li><span>FC008</span><h3>Shared environment resources</h3><p>Warn when staging points at the same stateful resource as production.</p><b>ISOLATION</b></li>
+        </ol>
+      </section>
+
+      <section class="workflow" id="how">
+        <div class="section-label">
+          <span>03</span>
+          <p>How FlareCheck works</p>
+        </div>
+        <div class="workflow-grid">
+          <div class="workflow-copy">
+            <h2>One command.<br />A useful answer.</h2>
+            <p>
+              Run FlareCheck from a Cloudflare Workers project or pass a path.
+              It discovers Wrangler JSON, JSONC, or TOML and reads package scripts
+              without executing project code.
+            </p>
+          </div>
+          <ol class="steps">
+            <li><span>01</span><div><h3>Discover</h3><p>Locate the Worker config and project root.</p></div></li>
+            <li><span>02</span><div><h3>Inspect</h3><p>Run deterministic checks against configuration and scripts.</p></div></li>
+            <li><span>03</span><div><h3>Act</h3><p>Return plain-language fixes, documentation, and CI-safe exit codes.</p></div></li>
+          </ol>
+        </div>
+        <div class="formats">
+          <p>Human-readable by default</p>
+          <code>flarecheck</code>
+          <p>Structured for automation</p>
+          <code>flarecheck --json</code>
+          <p>Warnings fail CI</p>
+          <code>flarecheck --strict</code>
         </div>
       </section>
 
-      <section class="shell principles">
-        <p class="eyebrow"><span></span> Designed for trust</p>
-        <div class="principle-grid">
-          <h2>No account.<br />No upload.<br /><em>No guesswork.</em></h2>
-          <ul>
-            <li><b>Local first</b><span>Your source never leaves your machine.</span></li>
-            <li><b>Deterministic</b><span>Every finding comes from a documented rule.</span></li>
-            <li><b>CI ready</b><span>JSON output and meaningful exit codes from day one.</span></li>
-          </ul>
+      <section class="faq" id="faq">
+        <div class="section-label">
+          <span>04</span>
+          <p>Common questions</p>
+        </div>
+        <div class="faq-grid">
+          <h2>Before you run it.</h2>
+          <div>
+            <details open>
+              <summary>What does FlareCheck inspect?</summary>
+              <p>It reads Wrangler configuration and package scripts to find high-confidence deployment risks. It never executes your Worker.</p>
+            </details>
+            <details>
+              <summary>Does FlareCheck upload my source code?</summary>
+              <p>No. The entire scan runs locally. There is no account, telemetry service, or source upload.</p>
+            </details>
+            <details>
+              <summary>Can I run it in CI?</summary>
+              <p>Yes. Use <code>--json</code> for structured output and <code>--strict</code> to fail on warnings as well as errors.</p>
+            </details>
+            <details>
+              <summary>Does it replace Wrangler validation?</summary>
+              <p>No. Wrangler validates configuration shape. FlareCheck adds production-readiness opinions about valid configurations that can still be risky.</p>
+            </details>
+          </div>
         </div>
       </section>
 
-      <section class="cta">
-        <div class="shell">
-          <p class="eyebrow"><span></span> Seven checks. One command.</p>
-          <h2>Make the deploy<br />the <em>boring</em> part.</h2>
-          <button class="install" type="button" data-copy="npx github:loke-dev/flarecheck">
-            <span aria-hidden="true">$</span>
-            <code>npx github:loke-dev/flarecheck</code>
-            <span class="copy-label">Copy</span>
-          </button>
-        </div>
+      <section class="final-cta">
+        <p class="kicker">Preflight status / awaiting config</p>
+        <h2>Make production<br />less surprising.</h2>
+        <button class="command command-dark" type="button" data-copy="npx github:loke-dev/flarecheck">
+          <span class="prompt" aria-hidden="true">$</span>
+          <code>npx github:loke-dev/flarecheck</code>
+          <span class="copy-label">COPY</span>
+        </button>
+        <span class="stamp" aria-hidden="true">LOCAL<br />ONLY</span>
       </section>
     </main>
 
-    <footer class="shell">
-      <a class="brand" href="/"><span class="mark" aria-hidden="true">F</span><span>FlareCheck</span></a>
-      <p>Built by <a href="https://loke.dev">Loke</a> for Workers that have to work.</p>
-      <a href="https://github.com/loke-dev/flarecheck">MIT · GitHub ↗</a>
+    <footer>
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>FLARECHECK</span>
+      </a>
+      <p>Built by <a href="https://loke.dev/">Loke</a> for Workers that have to work.</p>
+      <div><a href="https://github.com/loke-dev/flarecheck">MIT License</a><a href="https://github.com/loke-dev/flarecheck">GitHub ↗</a></div>
     </footer>
     <script type="module" src="/main.js"></script>
   </body>

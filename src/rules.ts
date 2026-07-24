@@ -51,6 +51,7 @@ export function runChecks(context: RuleContext): CheckResult[] {
     checkEnvironmentBindings(context),
     checkDeployCommand(context),
     checkConfigFormat(context),
+    checkSharedEnvironmentResources(context),
   ]
 }
 
@@ -286,6 +287,73 @@ function checkConfigFormat({ configPath }: RuleContext): CheckResult {
     ])
   }
   return result('FC007', title)
+}
+
+interface ResourceType {
+  configKey: string
+  identityKey: string
+  label: string
+}
+
+const STATEFUL_RESOURCES: ResourceType[] = [
+  { configKey: 'd1_databases', identityKey: 'database_id', label: 'D1 database' },
+  { configKey: 'kv_namespaces', identityKey: 'id', label: 'KV namespace' },
+  { configKey: 'r2_buckets', identityKey: 'bucket_name', label: 'R2 bucket' },
+  { configKey: 'hyperdrive', identityKey: 'id', label: 'Hyperdrive configuration' },
+  { configKey: 'vectorize', identityKey: 'index_name', label: 'Vectorize index' },
+]
+
+function checkSharedEnvironmentResources({ config, configPath }: RuleContext): CheckResult {
+  const title = 'Production resources are isolated by environment'
+  const environments = asRecord(config.env)
+  const production = asRecord(environments?.production)
+  if (!environments || !production) return result('FC008', title)
+
+  const findings: Finding[] = []
+  for (const [environmentName, environmentValue] of Object.entries(environments)) {
+    if (environmentName === 'production') continue
+    const environment = asRecord(environmentValue)
+    if (!environment) continue
+
+    for (const resource of STATEFUL_RESOURCES) {
+      const productionTargets = resourceTargets(production[resource.configKey], resource)
+      const environmentTargets = resourceTargets(environment[resource.configKey], resource)
+
+      for (const [binding, target] of environmentTargets) {
+        if (productionTargets.get(binding) !== target) continue
+        findings.push(
+          finding(
+            'FC008',
+            'warning',
+            `${environmentName} shares a production ${resource.label}`,
+            `env.${environmentName}.${resource.configKey} binding "${binding}" points to the same resource as env.production.`,
+            configPath,
+            {
+              docs: DOCS.environments,
+              suggestion: `Give env.${environmentName} a separate ${resource.label} and update its ${resource.identityKey}.`,
+            },
+          ),
+        )
+      }
+    }
+  }
+
+  return result('FC008', title, findings)
+}
+
+function resourceTargets(value: unknown, type: ResourceType): Map<string, string> {
+  if (!Array.isArray(value)) return new Map()
+
+  const targets = new Map<string, string>()
+  for (const item of value) {
+    const resource = asRecord(item)
+    const binding = resource?.binding
+    const identity = resource?.[type.identityKey]
+    if (typeof binding === 'string' && typeof identity === 'string') {
+      targets.set(binding, identity)
+    }
+  }
+  return targets
 }
 
 function result(ruleId: string, title: string, findings: Finding[] = []): CheckResult {

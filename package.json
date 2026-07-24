@@ -1,6 +1,6 @@
 {
   "name": "flarecheck",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Production-readiness checks for Cloudflare Workers projects.",
   "type": "module",
   "bin": {
