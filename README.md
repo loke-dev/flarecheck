@@ -2,6 +2,8 @@
 
 Production-readiness checks for Cloudflare Workers projects.
 
+[Website](https://flarecheck.loke.dev) · [Report a finding](https://github.com/loke-dev/flarecheck/issues)
+
 FlareCheck catches Cloudflare configuration risks that builds and type checks
 cannot see: committed secrets, non-inherited environment bindings, ambiguous
 deployment commands, stale compatibility dates, and missing observability.

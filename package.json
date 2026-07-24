@@ -37,7 +37,7 @@
     "type": "git",
     "url": "git+https://github.com/loke-dev/flarecheck.git"
   },
-  "homepage": "https://flarecheck.dev",
+  "homepage": "https://flarecheck.loke.dev",
   "bugs": {
     "url": "https://github.com/loke-dev/flarecheck/issues"
   },
