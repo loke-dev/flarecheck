@@ -135,7 +135,7 @@ stable fingerprints.
 
 ## Checks
 
-[Full rule reference with examples and fixes](https://flarecheck.loke.dev/rules.html)
+[Full rule reference with examples and fixes](https://flarecheck.loke.dev/rules)
 
 | Rule | Check |
 | --- | --- |
