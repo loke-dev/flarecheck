@@ -1,0 +1,62 @@
+{
+  "name": "flarecheck",
+  "version": "0.1.0",
+  "description": "Production-readiness checks for Cloudflare Workers projects.",
+  "type": "module",
+  "bin": {
+    "flarecheck": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/cli.ts --format esm --clean --dts",
+    "check": "tsc --noEmit && vitest run && tsup src/cli.ts --format esm --clean --dts",
+    "dev": "tsx src/cli.ts",
+    "site:dev": "vite --config site/vite.config.ts",
+    "site:build": "vite build --config site/vite.config.ts",
+    "site:preview": "vite preview --config site/vite.config.ts",
+    "deploy": "vite build --config site/vite.config.ts && wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepare": "tsup src/cli.ts --format esm --clean --dts"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "wrangler",
+    "lint",
+    "production-readiness"
+  ],
+  "author": "Loke",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loke-dev/flarecheck.git"
+  },
+  "homepage": "https://flarecheck.dev",
+  "bugs": {
+    "url": "https://github.com/loke-dev/flarecheck/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1",
+    "picocolors": "^1.1.1",
+    "smol-toml": "^1.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^3.2.0",
+    "wrangler": "4.113.0"
+  },
+  "packageManager": "pnpm@11.13.0"
+}

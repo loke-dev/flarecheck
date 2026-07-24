@@ -1,0 +1,21 @@
+{
+  "name": "risky-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-01",
+  "vars": {
+    "API_KEY": "sk-live-do-not-commit",
+    "ENVIRONMENT": "production"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "production",
+      "database_id": "production-id"
+    }
+  ],
+  "env": {
+    "staging": {
+      "name": "risky-worker-staging"
+    }
+  }
+}

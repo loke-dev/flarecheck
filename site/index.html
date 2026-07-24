@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Catch Cloudflare Workers configuration risks before they reach production."
+    />
+    <meta name="theme-color" content="#0b0b0c" />
+    <meta property="og:title" content="FlareCheck — Know before you deploy" />
+    <meta
+      property="og:description"
+      content="Production-readiness checks for Cloudflare Workers projects."
+    />
+    <meta property="og:type" content="website" />
+    <title>FlareCheck — Know before you deploy</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="shell nav">
+      <a class="brand" href="/" aria-label="FlareCheck home">
+        <span class="mark" aria-hidden="true">F</span>
+        <span>FlareCheck</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#checks">Checks</a>
+        <a href="https://github.com/loke-dev/flarecheck">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="shell hero">
+        <div class="eyebrow"><span></span> Open source · Local first</div>
+        <h1>Know before<br />you <em>deploy.</em></h1>
+        <p class="lede">
+          FlareCheck catches Cloudflare Workers configuration risks that builds,
+          type checks, and local development cannot see.
+        </p>
+        <div class="actions">
+          <button class="install" type="button" data-copy="npx flarecheck">
+            <span aria-hidden="true">$</span>
+            <code>npx flarecheck</code>
+            <span class="copy-label">Copy</span>
+          </button>
+          <a class="secondary" href="https://github.com/loke-dev/flarecheck">
+            View source <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="terminal-wrap">
+          <div class="terminal-glow" aria-hidden="true"></div>
+          <div class="terminal" aria-label="Example FlareCheck output">
+            <div class="terminal-bar">
+              <span></span><span></span><span></span>
+              <p>~/projects/worker</p>
+            </div>
+            <div class="terminal-body">
+              <p><b>$</b> npx flarecheck</p>
+              <p class="space"><strong>FlareCheck</strong> <i>v0.1.0</i></p>
+              <p class="muted">wrangler.jsonc</p>
+              <p class="space">Production readiness: <mark>72/100</mark></p>
+              <p class="space error">✗ ERROR <i>FC003</i> <strong>Likely secret committed as API_KEY</strong></p>
+              <p class="indent muted">vars.API_KEY looks sensitive and will be stored in source control.</p>
+              <p class="indent fix">Fix: Store it with wrangler secret put API_KEY.</p>
+              <p class="space warning">! WARNING <i>FC005</i> <strong>staging is missing bindings</strong></p>
+              <p class="indent muted">d1_databases is not inherited by env.staging.</p>
+              <p class="space muted">1 error · 2 warnings · 4 checks passed</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="proof">
+        <div class="shell proof-grid">
+          <p>Built for the gap between</p>
+          <div><span>Build passed</span><b>→</b><span>Production ready</span></div>
+        </div>
+      </section>
+
+      <section class="shell checks" id="checks">
+        <div class="section-heading">
+          <p class="eyebrow"><span></span> High-signal checks</p>
+          <h2>Small mistakes.<br /><em>Real incidents.</em></h2>
+        </div>
+        <div class="check-grid">
+          <article>
+            <span>01</span>
+            <h3>Environment drift</h3>
+            <p>Find bindings and variables that disappear in staging because Wrangler does not inherit them.</p>
+            <code>FC005</code>
+          </article>
+          <article>
+            <span>02</span>
+            <h3>Committed secrets</h3>
+            <p>Catch likely credentials stored in vars before configuration reaches source control.</p>
+            <code>FC003</code>
+          </article>
+          <article>
+            <span>03</span>
+            <h3>Blind deployments</h3>
+            <p>Spot deploy scripts that target the root Worker instead of an explicit production environment.</p>
+            <code>FC006</code>
+          </article>
+          <article>
+            <span>04</span>
+            <h3>Missing evidence</h3>
+            <p>Verify that logs, compatibility behavior, and production sampling are configured deliberately.</p>
+            <code>FC001 · FC004</code>
+          </article>
+        </div>
+      </section>
+
+      <section class="shell principles">
+        <p class="eyebrow"><span></span> Designed for trust</p>
+        <div class="principle-grid">
+          <h2>No account.<br />No upload.<br /><em>No guesswork.</em></h2>
+          <ul>
+            <li><b>Local first</b><span>Your source never leaves your machine.</span></li>
+            <li><b>Deterministic</b><span>Every finding comes from a documented rule.</span></li>
+            <li><b>CI ready</b><span>JSON output and meaningful exit codes from day one.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="shell">
+          <p class="eyebrow"><span></span> Seven checks. One command.</p>
+          <h2>Make the deploy<br />the <em>boring</em> part.</h2>
+          <button class="install" type="button" data-copy="npx flarecheck">
+            <span aria-hidden="true">$</span>
+            <code>npx flarecheck</code>
+            <span class="copy-label">Copy</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="shell">
+      <a class="brand" href="/"><span class="mark" aria-hidden="true">F</span><span>FlareCheck</span></a>
+      <p>Built by <a href="https://loke.dev">Loke</a> for Workers that have to work.</p>
+      <a href="https://github.com/loke-dev/flarecheck">MIT · GitHub ↗</a>
+    </footer>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
