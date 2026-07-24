@@ -27,4 +27,4 @@ jobs:
       - name: Smoke-test the reusable action
         uses: ./
         with:
-          version: 0.7.0
+          version: 0.8.0

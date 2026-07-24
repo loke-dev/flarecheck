@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         index: resolve(root, 'index.html'),
         notFound: resolve(root, '404.html'),
+        rules: resolve(root, 'rules.html'),
         socialPreview: resolve(root, 'og.html'),
       },
     },

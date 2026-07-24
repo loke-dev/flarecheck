@@ -15,7 +15,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.8.0
+FlareCheck v0.8.1
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -57,13 +57,13 @@ workflow on errors or warnings:
 
 ```yaml
 - uses: actions/checkout@v6
-- uses: loke-dev/flarecheck@v0.8.0
+- uses: loke-dev/flarecheck@v0.8.1
 ```
 
 Inputs support focused and monorepo scans:
 
 ```yaml
-- uses: loke-dev/flarecheck@v0.8.0
+- uses: loke-dev/flarecheck@v0.8.1
   with:
     path: apps
     all: true
@@ -134,6 +134,8 @@ report. FlareCheck includes rule metadata, severity, file locations, fixes, and
 stable fingerprints.
 
 ## Checks
+
+[Full rule reference with examples and fixes](https://flarecheck.loke.dev/rules.html)
 
 | Rule | Check |
 | --- | --- |

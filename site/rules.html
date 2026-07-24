@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Detailed reference for all FlareCheck Cloudflare Workers configuration checks: compatibility dates, secrets, observability, environments, deploy safety, and production resource isolation."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#f04b23" />
+    <meta property="og:title" content="FlareCheck Rules — Cloudflare Workers configuration checks" />
+    <meta
+      property="og:description"
+      content="Eight inspectable checks for safer Cloudflare Workers deployments, with examples and fixes."
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://flarecheck.loke.dev/rules.html" />
+    <meta property="og:site_name" content="FlareCheck" />
+    <meta property="og:image" content="https://flarecheck.loke.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="FlareCheck Cloudflare Workers preflight inspection card" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FlareCheck Rules — Cloudflare Workers configuration checks" />
+    <meta name="twitter:description" content="Eight inspectable checks with examples, fixes, and official Cloudflare references." />
+    <meta name="twitter:image" content="https://flarecheck.loke.dev/og.png" />
+    <link rel="canonical" href="https://flarecheck.loke.dev/rules.html" />
+    <title>Cloudflare Workers Configuration Checks — FlareCheck Rules</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/rules.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "FlareCheck Cloudflare Workers configuration rules",
+        "numberOfItems": 8,
+        "itemListElement": [
+          {"@type":"ListItem","position":1,"name":"FC001 Compatibility date","url":"https://flarecheck.loke.dev/rules.html#fc001"},
+          {"@type":"ListItem","position":2,"name":"FC002 Node.js compatibility","url":"https://flarecheck.loke.dev/rules.html#fc002"},
+          {"@type":"ListItem","position":3,"name":"FC003 Committed secrets","url":"https://flarecheck.loke.dev/rules.html#fc003"},
+          {"@type":"ListItem","position":4,"name":"FC004 Production observability","url":"https://flarecheck.loke.dev/rules.html#fc004"},
+          {"@type":"ListItem","position":5,"name":"FC005 Environment binding drift","url":"https://flarecheck.loke.dev/rules.html#fc005"},
+          {"@type":"ListItem","position":6,"name":"FC006 Explicit deploy environment","url":"https://flarecheck.loke.dev/rules.html#fc006"},
+          {"@type":"ListItem","position":7,"name":"FC007 Recommended JSONC format","url":"https://flarecheck.loke.dev/rules.html#fc007"},
+          {"@type":"ListItem","position":8,"name":"FC008 Production resource isolation","url":"https://flarecheck.loke.dev/rules.html#fc008"}
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <div class="paper-noise" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="FlareCheck home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>FLARECHECK</span>
+      </a>
+      <p class="issue">RULE INDEX / v0.8</p>
+      <nav aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="#rule-index">Index</a>
+        <a href="https://github.com/loke-dev/flarecheck">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="content" class="docs">
+      <section class="docs-hero">
+        <div>
+          <p class="kicker">Cloudflare Workers / rule reference</p>
+          <h1>Eight checks.<br /><em>Zero mystery.</em></h1>
+        </div>
+        <div class="docs-intro">
+          <p>
+            FlareCheck rules target valid configurations that can still behave
+            unexpectedly in production. Every finding has a stable ID, a concrete
+            consequence, an actionable fix, and a link to Cloudflare’s documentation.
+          </p>
+          <code>$ npx flarecheck --list-rules</code>
+        </div>
+      </section>
+
+      <section class="rule-index" id="rule-index" aria-labelledby="index-title">
+        <div class="index-heading">
+          <span>INDEX</span>
+          <h2 id="index-title">Choose a check</h2>
+        </div>
+        <ol>
+          <li><a href="#fc001"><span>FC001</span> Compatibility date <b>RUNTIME</b></a></li>
+          <li><a href="#fc002"><span>FC002</span> Node.js compatibility <b>RUNTIME</b></a></li>
+          <li><a href="#fc003"><span>FC003</span> Committed secrets <b>SECURITY</b></a></li>
+          <li><a href="#fc004"><span>FC004</span> Production observability <b>EVIDENCE</b></a></li>
+          <li><a href="#fc005"><span>FC005</span> Environment binding drift <b>CONFIG</b></a></li>
+          <li><a href="#fc006"><span>FC006</span> Explicit deploy environment <b>RELEASE</b></a></li>
+          <li><a href="#fc007"><span>FC007</span> Recommended JSONC format <b>MAINTENANCE</b></a></li>
+          <li><a href="#fc008"><span>FC008</span> Production resource isolation <b>ISOLATION</b></a></li>
+        </ol>
+      </section>
+
+      <article class="rule-doc" id="fc001">
+        <header><span>FC001</span><p>Runtime / warning or error</p></header>
+        <div class="rule-copy">
+          <h2>Compatibility date is current</h2>
+          <p>
+            A Worker’s <code>compatibility_date</code> opts it into runtime behavior
+            and compatibility flags available on that date. Cloudflare recommends
+            setting the current date for a new project and updating it occasionally
+            with testing. Old dates remain supported; FlareCheck’s 90-day warning is
+            an intentionally opinionated maintenance signal, not a platform deadline.
+          </p>
+          <p>
+            A missing or invalid date is an error because the deployed runtime contract
+            is unclear. A stale but valid date is a warning so upgrades remain deliberate.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/configuration/compatibility-dates/">Cloudflare compatibility date docs ↗</a>
+        </div>
+        <div class="example">
+          <p>WRANGLER.JSONC</p>
+          <pre><code>{
+  "compatibility_date": "2026-07-24"
+}</code></pre>
+          <small>Update the date, run tests, then deploy.</small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc002">
+        <header><span>FC002</span><p>Runtime / warning</p></header>
+        <div class="rule-copy">
+          <h2>Node.js compatibility is explicit</h2>
+          <p>
+            Dependencies can use Node.js built-in modules even when your own Worker
+            source does not. Cloudflare calls out a subtle testing trap: the Workers
+            Vitest pool can inject <code>nodejs_compat</code>, allowing tests to pass
+            while the deployed Wrangler configuration lacks the flag.
+          </p>
+          <p>
+            Not every Worker needs Node APIs, so FC002 is a warning. Keep the flag when
+            your application or dependency graph relies on supported Node built-ins;
+            otherwise ignore this rule explicitly so the decision stays visible.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/best-practices/workers-best-practices/">Cloudflare Workers best practices ↗</a>
+        </div>
+        <div class="example">
+          <p>WRANGLER.JSONC</p>
+          <pre><code>{
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}</code></pre>
+          <small>Or run <code>--ignore FC002</code> when it is intentionally unnecessary.</small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc003">
+        <header><span>FC003</span><p>Security / error</p></header>
+        <div class="rule-copy">
+          <h2>Likely secrets are not committed in vars</h2>
+          <p>
+            Wrangler <code>vars</code> are plain configuration values and belong in
+            source control. Cloudflare explicitly cautions against storing sensitive
+            information there. FC003 looks for secret-like names such as API keys,
+            tokens, passwords, and client secrets with non-placeholder values.
+          </p>
+          <p>
+            Remove the value from the configuration, rotate it if it was real, and
+            store the replacement with Wrangler secrets. Local <code>.dev.vars</code>
+            or <code>.env</code> files should also be excluded from Git.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/configuration/secrets/">Cloudflare Workers secrets docs ↗</a>
+        </div>
+        <div class="example example-danger">
+          <p>DO NOT COMMIT</p>
+          <pre><code>{
+  "vars": {
+    "API_KEY": "live-secret"
+  }
+}</code></pre>
+          <small><code>npx wrangler secret put API_KEY</code></small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc004">
+        <header><span>FC004</span><p>Evidence / warning</p></header>
+        <div class="rule-copy">
+          <h2>Production observability is intentional</h2>
+          <p>
+            Workers Logs require observability configuration to persist invocation
+            logs. Without it, the evidence needed during an incident may be missing.
+            FC004 also flags a 100% head sampling rate: Cloudflare documents that the
+            value controls the percentage of requests logged and can affect volume.
+          </p>
+          <p>
+            Full sampling can be right for low traffic or short investigations. The
+            warning asks teams to choose it deliberately rather than inherit the
+            default accidentally.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/observability/logs/workers-logs/">Cloudflare Workers Logs docs ↗</a>
+        </div>
+        <div class="example">
+          <p>WRANGLER.JSONC</p>
+          <pre><code>{
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  }
+}</code></pre>
+          <small>Choose a rate that matches traffic and debugging needs.</small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc005">
+        <header><span>FC005</span><p>Configuration / warning</p></header>
+        <div class="rule-copy">
+          <h2>Every environment declares its bindings</h2>
+          <p>
+            Named Wrangler environments create distinct Workers. Bindings and
+            environment variables are non-inheritable, so a D1, KV, R2, service, or
+            <code>vars</code> declaration at the root does not automatically appear
+            inside <code>env.staging</code> or <code>env.production</code>.
+          </p>
+          <p>
+            FC005 compares each named environment with root binding categories and
+            reports omissions. The fix is not blind copying: declare the resource
+            intended for that environment, with environment-specific identities.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare Wrangler environments docs ↗</a>
+        </div>
+        <div class="example">
+          <p>NON-INHERITED BINDING</p>
+          <pre><code>{
+  "env": {
+    "production": {
+      "d1_databases": [{
+        "binding": "DB",
+        "database_id": "prod-id"
+      }]
+    }
+  }
+}</code></pre>
+          <small>Repeat the binding shape; change the target identity.</small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc006">
+        <header><span>FC006</span><p>Release / warning</p></header>
+        <div class="rule-copy">
+          <h2>Deploy scripts select an environment</h2>
+          <p>
+            With named environments present, a bare <code>wrangler deploy</code>
+            still targets the top-level Worker. Cloudflare’s environment examples use
+            <code>--env staging</code> and <code>--env production</code> to select a
+            named target. A package script that omits the flag makes the target depend
+            on operator context and is easy to run incorrectly.
+          </p>
+          <p>
+            FC006 points directly to the script line in <code>package.json</code>.
+            Make production, staging, and preview commands explicit and reviewable.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment selection docs ↗</a>
+        </div>
+        <div class="example">
+          <p>PACKAGE.JSON</p>
+          <pre><code>{
+  "scripts": {
+    "deploy:prod":
+      "wrangler deploy --env production"
+  }
+}</code></pre>
+          <small>The environment is visible before the command runs.</small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc007">
+        <header><span>FC007</span><p>Maintenance / info</p></header>
+        <div class="rule-copy">
+          <h2>Wrangler uses the recommended JSONC format</h2>
+          <p>
+            Wrangler supports JSON, JSONC, and TOML, but Cloudflare recommends
+            <code>wrangler.jsonc</code> for new projects and notes that some newer
+            features are available only with JSON configuration. JSONC also supports
+            comments while matching the configuration shape used in current docs and
+            schema tooling.
+          </p>
+          <p>
+            TOML remains supported, so FC007 is informational and never reduces the
+            readiness score. Migrate when convenient rather than interrupting a release.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/configuration/">Cloudflare Wrangler configuration docs ↗</a>
+        </div>
+        <div class="example">
+          <p>WRANGLER.JSONC</p>
+          <pre><code>{
+  "$schema":
+    "./node_modules/wrangler/config-schema.json",
+  "name": "my-worker"
+}</code></pre>
+          <small>Comments plus editor validation.</small>
+        </div>
+      </article>
+
+      <article class="rule-doc" id="fc008">
+        <header><span>FC008</span><p>Isolation / warning</p></header>
+        <div class="rule-copy">
+          <h2>Production resources are isolated</h2>
+          <p>
+            Correctly redeclaring bindings is only half the environment problem. A
+            staging binding can still point at the same D1 database, KV namespace,
+            R2 bucket, Hyperdrive configuration, or Vectorize index as production.
+            The configuration is valid, but staging traffic can mutate production state.
+          </p>
+          <p>
+            FC008 compares binding names and resource identity fields between
+            <code>env.production</code> and every other environment. Give each
+            non-production environment its own stateful resource unless sharing is an
+            explicit, reviewed choice.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment isolation docs ↗</a>
+        </div>
+        <div class="example example-danger">
+          <p>RISKY TARGET REUSE</p>
+          <pre><code>"production": {
+  "d1_databases": [{
+    "database_id": "same-id"
+  }]
+},
+"staging": {
+  "d1_databases": [{
+    "database_id": "same-id"
+  }]
+}</code></pre>
+          <small>Use a different resource ID outside production.</small>
+        </div>
+      </article>
+
+      <section class="docs-cta">
+        <div>
+          <p class="kicker">Run the complete inspection</p>
+          <h2>Know before<br />you deploy.</h2>
+        </div>
+        <div>
+          <code>$ npx flarecheck</code>
+          <p>Or focus adoption with <code>--only FC003,FC005,FC008</code>.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>FLARECHECK</span>
+      </a>
+      <p>Built by <a href="https://loke.dev/">Loke</a> for Workers that have to work.</p>
+      <div><a href="/">Home</a><a href="https://github.com/loke-dev/flarecheck">GitHub ↗</a></div>
+    </footer>
+  </body>
+</html>

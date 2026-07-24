@@ -159,6 +159,7 @@ h1 em { display: block; color: var(--flare); font-style: normal; }
 .rules-heading { padding: 70px 0; display: grid; grid-template-columns: 1fr .55fr; align-items: end; gap: 60px; }
 .rules-heading h2 { font-size: clamp(56px, 7vw, 104px); }
 .rules-heading p { margin: 0; color: #9b9c94; line-height: 1.7; }
+.rules-reference-link { display: block; width: max-content; margin-top: 18px; color: var(--paper-bright); border-bottom: 1px solid var(--flare); font-size: 12px; }
 .rule-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid #454640; }
 .rule-list li { min-height: 92px; display: grid; grid-template-columns: 90px 1fr 1.4fr 110px; align-items: center; gap: 30px; border-bottom: 1px solid #454640; transition: padding .2s ease, background .2s ease; }
 .rule-list li:hover { padding-inline: 16px; background: #21221f; }
