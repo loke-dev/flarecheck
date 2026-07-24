@@ -11,7 +11,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.2.0
+FlareCheck v0.2.1
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
