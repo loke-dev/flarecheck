@@ -115,9 +115,43 @@ h1 em { display: block; color: var(--flare); font-style: normal; }
 .crosshair { position: absolute; background: rgba(23,24,22,.45); }
 .crosshair-x { left: -8%; right: -8%; top: 50%; height: 1px; }
 .crosshair-y { top: -8%; bottom: -8%; left: 50%; width: 1px; }
-.score { position: absolute; inset: 37%; display: grid; place-content: center; text-align: center; border-radius: 50%; background: var(--ink); color: var(--paper-bright); }
-.score b { font: 500 clamp(44px, 6vw, 82px) "DM Mono", monospace; line-height: .9; letter-spacing: -.08em; }
-.score span { margin-top: 7px; color: #aaa99f; font: 10px "DM Mono", monospace; }
+.score {
+  position: absolute;
+  inset: 34%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper-bright);
+  text-align: center;
+  box-shadow: 0 0 0 1px rgba(240, 75, 35, .18);
+}
+.score-label {
+  margin: 0 0 clamp(4px, .65vw, 9px);
+  color: #aaa99f;
+  font: 500 clamp(7px, .65vw, 10px)/1 "DM Mono", monospace;
+  letter-spacing: .14em;
+}
+.score-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, .4vw, 7px);
+  white-space: nowrap;
+}
+.score-value b {
+  font: 500 clamp(40px, 5.5vw, 76px)/.78 "DM Mono", monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+.score-value small {
+  color: #aaa99f;
+  font: 500 clamp(8px, .7vw, 11px)/1 "DM Mono", monospace;
+  letter-spacing: .06em;
+}
 .blip { position: absolute; width: 8px; height: 8px; background: var(--ink); box-shadow: 0 0 0 4px rgba(23,24,22,.16); }
 .blip-one { left: 20%; top: 40%; }
 .blip-two { right: 20%; top: 25%; }

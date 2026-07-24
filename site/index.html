@@ -43,7 +43,7 @@
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
         "description": "An open-source command-line checker for Cloudflare Workers configuration risks in individual projects and monorepos.",
-        "softwareVersion": "0.8.1",
+        "softwareVersion": "0.9.0",
         "license": "https://opensource.org/license/mit",
         "codeRepository": "https://github.com/loke-dev/flarecheck",
         "author": {
@@ -162,7 +162,7 @@
           <ul class="hero-facts" aria-label="Product facts">
             <li><b>00</b><span>accounts</span></li>
             <li><b>00</b><span>uploads</span></li>
-            <li><b>08</b><span>rules</span></li>
+            <li><b>09</b><span>rules</span></li>
           </ul>
         </div>
 
@@ -177,7 +177,10 @@
             <span class="sweep"></span>
             <span class="crosshair crosshair-x"></span>
             <span class="crosshair crosshair-y"></span>
-            <div class="score"><b>92</b><span>/ 100</span></div>
+            <div class="score">
+              <span class="score-label">READINESS</span>
+              <span class="score-value"><b>92</b><small>/100</small></span>
+            </div>
             <i class="blip blip-one"></i>
             <i class="blip blip-two"></i>
             <i class="blip blip-three"></i>
@@ -187,7 +190,7 @@
             <dl>
               <div><dt>ERROR</dt><dd>00</dd></div>
               <div><dt>WARNING</dt><dd>01</dd></div>
-              <div><dt>PASSED</dt><dd>07</dd></div>
+              <div><dt>PASSED</dt><dd>08</dd></div>
             </dl>
           </div>
         </div>
@@ -219,7 +222,7 @@
         </div>
         <div class="receipt" aria-label="Example terminal output">
           <div class="receipt-top">
-            <span>FLARECHECK / v0.8.1</span>
+            <span>FLARECHECK / v0.9.0</span>
             <span>wrangler.jsonc</span>
           </div>
           <pre><code><span>$</span> flarecheck
@@ -234,7 +237,7 @@ Likely secret committed as API_KEY
 staging is missing d1_databases
 <i>→ declare it in env.staging</i>
 
-1 error · 2 warnings · 5 passed</code></pre>
+1 error · 2 warnings · 6 passed</code></pre>
           <p class="receipt-foot">EXIT 02 / ACTION REQUIRED</p>
         </div>
       </section>
@@ -245,7 +248,7 @@ staging is missing d1_databases
           <p>Cloudflare Workers checks</p>
         </div>
         <div class="rules-heading">
-          <h2>Eight opinions.<br />All inspectable.</h2>
+          <h2>Nine opinions.<br />All inspectable.</h2>
           <p>
             Every FlareCheck finding has a stable rule ID, an explanation, a suggested
             fix, and a link to the relevant Cloudflare documentation.
@@ -261,6 +264,7 @@ staging is missing d1_databases
           <li><span>FC006</span><h3><a href="/rules#fc006">Explicit deploy target</a></h3><p>Catch deployment scripts that can accidentally target the root Worker.</p><b>RELEASE</b></li>
           <li><span>FC007</span><h3><a href="/rules#fc007">Modern config format</a></h3><p>Recommend JSONC when a project still uses Wrangler TOML.</p><b>MAINTENANCE</b></li>
           <li><span>FC008</span><h3><a href="/rules#fc008">Shared environment resources</a></h3><p>Warn when staging points at the same stateful resource as production.</p><b>ISOLATION</b></li>
+          <li><span>FC009</span><h3><a href="/rules#fc009">Explicit environment routes</a></h3><p>Catch routed Workers whose named environments have no declared target.</p><b>ROUTING</b></li>
         </ol>
       </section>
 
@@ -303,7 +307,7 @@ staging is missing d1_databases
           <p>Feed GitHub Code Scanning</p>
           <code>flarecheck --sarif &gt; flarecheck.sarif</code>
           <p>Use the reusable GitHub Action</p>
-          <code>loke-dev/flarecheck@v0.8.1</code>
+          <code>loke-dev/flarecheck@v0.9.0</code>
         </div>
       </section>
 
@@ -341,7 +345,7 @@ staging is missing d1_databases
             </details>
             <details>
               <summary>Is there a reusable GitHub Action?</summary>
-              <p>Yes. Add <code>loke-dev/flarecheck@v0.8.1</code> to a workflow for exact file and line annotations, strict warnings, monorepo scanning, and rule selection.</p>
+              <p>Yes. Add <code>loke-dev/flarecheck@v0.9.0</code> to a workflow for exact file and line annotations, strict warnings, monorepo scanning, and rule selection.</p>
             </details>
             <details>
               <summary>Does it replace Wrangler validation?</summary>

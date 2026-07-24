@@ -15,7 +15,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.8.1
+FlareCheck v0.9.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -57,17 +57,17 @@ workflow on errors or warnings:
 
 ```yaml
 - uses: actions/checkout@v6
-- uses: loke-dev/flarecheck@v0.8.1
+- uses: loke-dev/flarecheck@v0.9.0
 ```
 
 Inputs support focused and monorepo scans:
 
 ```yaml
-- uses: loke-dev/flarecheck@v0.8.1
+- uses: loke-dev/flarecheck@v0.9.0
   with:
     path: apps
     all: true
-    only: FC003,FC005,FC008
+    only: FC003,FC005,FC009
 ```
 
 The action runs the public npm package and accepts `path`, `strict`, `all`,
@@ -147,6 +147,7 @@ stable fingerprints.
 | `FC006` | Deployment scripts select a configured environment |
 | `FC007` | Wrangler uses Cloudflare's recommended JSONC format |
 | `FC008` | Non-production environments do not share stateful production resources |
+| `FC009` | Routed Workers give every named environment an explicit target |
 
 Rules are deterministic, documented, and designed to favor useful findings over
 volume. FlareCheck never uploads source code or requires Cloudflare credentials.

@@ -63,9 +63,11 @@ h1 em { display: block; color: var(--flare); font-style: normal; }
 .axis { position: absolute; background: rgba(23,24,22,.45); }
 .axis.x { left: -9%; right: -9%; top: 50%; height: 1px; }
 .axis.y { top: -9%; bottom: -9%; left: 50%; width: 1px; }
-.score { position: absolute; inset: 36%; display: grid; place-content: center; border-radius: 50%; background: var(--ink); color: white; text-align: center; }
-.score b { font: 500 44px/.9 "DM Mono", monospace; letter-spacing: -.08em; }
-.score small { margin-top: 7px; color: #aaa99f; font: 9px "DM Mono", monospace; }
+.score { position: absolute; inset: 31%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; background: var(--ink); color: white; text-align: center; }
+.score-label { margin-bottom: 7px; color: #aaa99f; font: 500 7px/1 "DM Mono", monospace; letter-spacing: .14em; }
+.score-value { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; }
+.score-value b { font: 500 40px/.78 "DM Mono", monospace; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.score-value small { color: #aaa99f; font: 500 8px/1 "DM Mono", monospace; letter-spacing: .06em; }
 .blip { position: absolute; width: 9px; height: 9px; background: var(--ink); box-shadow: 0 0 0 4px rgba(23,24,22,.16); }
 .blip.a { left: 17%; top: 38%; }
 .blip.b { right: 17%; top: 24%; background: var(--acid); }

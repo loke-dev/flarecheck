@@ -55,7 +55,7 @@ describe('formatSarif', () => {
       name: 'FlareCheck',
       semanticVersion: '0.3.0',
     })
-    expect(sarif.runs[0].tool.driver.rules).toHaveLength(8)
+    expect(sarif.runs[0].tool.driver.rules).toHaveLength(9)
     expect(sarif.runs[0].results[0]).toMatchObject({
       ruleId: 'FC003',
       ruleIndex: 2,
@@ -85,7 +85,7 @@ function scanResult(overrides: Partial<ScanResult>): ScanResult {
       errors: 0,
       warnings: 0,
       info: 0,
-      passed: 8,
+      passed: 9,
     },
     ...overrides,
   }

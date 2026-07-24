@@ -15,7 +15,7 @@ describe('analyze', () => {
       errors: 0,
       warnings: 0,
       info: 0,
-      passed: 8,
+      passed: 9,
     })
   })
 
@@ -27,7 +27,7 @@ describe('analyze', () => {
       errors: 1,
       warnings: 5,
       info: 0,
-      passed: 2,
+      passed: 3,
     })
     expect(result.findings.map((finding) => finding.ruleId)).toEqual([
       'FC001',
@@ -65,7 +65,7 @@ describe('analyze', () => {
       errors: 0,
       warnings: 1,
       info: 0,
-      passed: 7,
+      passed: 8,
     })
     expect(result.findings[0]).toMatchObject({
       ruleId: 'FC008',
@@ -74,6 +74,24 @@ describe('analyze', () => {
       line: 25,
     })
     expect(result.findings[0]?.message).toContain('env.production')
+  })
+
+  it('requires explicit targets for routed environments', async () => {
+    const result = await analyze(resolve(fixtures, 'routing'), { now })
+
+    expect(result.score).toBe(92)
+    expect(result.summary).toEqual({
+      errors: 0,
+      warnings: 1,
+      info: 0,
+      passed: 8,
+    })
+    expect(result.findings[0]).toMatchObject({
+      ruleId: 'FC009',
+      severity: 'warning',
+      title: 'staging has no explicit route target',
+      line: 15,
+    })
   })
 
   it('can run only selected rules', async () => {
@@ -97,27 +115,28 @@ describe('analyze', () => {
       ignore: ['FC007', 'FC008'],
     })
 
-    expect(result.summary.passed).toBe(6)
+    expect(result.summary.passed).toBe(7)
     expect(result.passed.map((rule) => rule.ruleId)).not.toContain('FC007')
   })
 
   it('recursively scans every Worker in a directory', async () => {
     const result = await analyzeAll(fixtures, { now, only: ['FC003'] })
 
-    expect(result.summary.projects).toBe(4)
+    expect(result.summary.projects).toBe(5)
     expect(result.projects.map((project) => project.configPath)).toEqual([
       resolve(fixtures, 'healthy/wrangler.jsonc'),
       resolve(fixtures, 'risky/wrangler.jsonc'),
+      resolve(fixtures, 'routing/wrangler.jsonc'),
       resolve(fixtures, 'shared-resource/wrangler.jsonc'),
       resolve(fixtures, 'toml/wrangler.toml'),
     ])
     expect(result.summary).toEqual({
-      projects: 4,
-      averageScore: 95,
+      projects: 5,
+      averageScore: 96,
       errors: 1,
       warnings: 0,
       info: 0,
-      passed: 3,
+      passed: 4,
     })
   })
 })

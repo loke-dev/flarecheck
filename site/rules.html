@@ -12,7 +12,7 @@
     <meta property="og:title" content="FlareCheck Rules — Cloudflare Workers configuration checks" />
     <meta
       property="og:description"
-      content="Eight inspectable checks for safer Cloudflare Workers deployments, with examples and fixes."
+      content="Nine inspectable checks for safer Cloudflare Workers deployments, with examples and fixes."
     />
     <meta property="og:type" content="article" />
     <meta property="og:url" content="https://flarecheck.loke.dev/rules" />
@@ -23,7 +23,7 @@
     <meta property="og:image:alt" content="FlareCheck Cloudflare Workers preflight inspection card" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="FlareCheck Rules — Cloudflare Workers configuration checks" />
-    <meta name="twitter:description" content="Eight inspectable checks with examples, fixes, and official Cloudflare references." />
+    <meta name="twitter:description" content="Nine inspectable checks with examples, fixes, and official Cloudflare references." />
     <meta name="twitter:image" content="https://flarecheck.loke.dev/og.png" />
     <link rel="canonical" href="https://flarecheck.loke.dev/rules" />
     <title>Cloudflare Workers Configuration Checks — FlareCheck Rules</title>
@@ -35,7 +35,7 @@
         "@context": "https://schema.org",
         "@type": "ItemList",
         "name": "FlareCheck Cloudflare Workers configuration rules",
-        "numberOfItems": 8,
+        "numberOfItems": 9,
         "itemListElement": [
           {"@type":"ListItem","position":1,"name":"FC001 Compatibility date","url":"https://flarecheck.loke.dev/rules#fc001"},
           {"@type":"ListItem","position":2,"name":"FC002 Node.js compatibility","url":"https://flarecheck.loke.dev/rules#fc002"},
@@ -44,7 +44,8 @@
           {"@type":"ListItem","position":5,"name":"FC005 Environment binding drift","url":"https://flarecheck.loke.dev/rules#fc005"},
           {"@type":"ListItem","position":6,"name":"FC006 Explicit deploy environment","url":"https://flarecheck.loke.dev/rules#fc006"},
           {"@type":"ListItem","position":7,"name":"FC007 Recommended JSONC format","url":"https://flarecheck.loke.dev/rules#fc007"},
-          {"@type":"ListItem","position":8,"name":"FC008 Production resource isolation","url":"https://flarecheck.loke.dev/rules#fc008"}
+          {"@type":"ListItem","position":8,"name":"FC008 Production resource isolation","url":"https://flarecheck.loke.dev/rules#fc008"},
+          {"@type":"ListItem","position":9,"name":"FC009 Explicit environment routing","url":"https://flarecheck.loke.dev/rules#fc009"}
         ]
       }
     </script>
@@ -57,7 +58,7 @@
         <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
         <span>FLARECHECK</span>
       </a>
-      <p class="issue">RULE INDEX / v0.8</p>
+      <p class="issue">RULE INDEX / v0.9</p>
       <nav aria-label="Primary">
         <a href="/">Home</a>
         <a href="#rule-index">Index</a>
@@ -69,7 +70,7 @@
       <section class="docs-hero">
         <div>
           <p class="kicker">Cloudflare Workers / rule reference</p>
-          <h1>Eight checks.<br /><em>Zero mystery.</em></h1>
+          <h1>Nine checks.<br /><em>Zero mystery.</em></h1>
         </div>
         <div class="docs-intro">
           <p>
@@ -95,6 +96,7 @@
           <li><a href="#fc006"><span>FC006</span> Explicit deploy environment <b>RELEASE</b></a></li>
           <li><a href="#fc007"><span>FC007</span> Recommended JSONC format <b>MAINTENANCE</b></a></li>
           <li><a href="#fc008"><span>FC008</span> Production resource isolation <b>ISOLATION</b></a></li>
+          <li><a href="#fc009"><span>FC009</span> Explicit environment routing <b>ROUTING</b></a></li>
         </ol>
       </section>
 
@@ -333,6 +335,41 @@
         </div>
       </article>
 
+      <article class="rule-doc" id="fc009">
+        <header><span>FC009</span><p>Routing / warning</p></header>
+        <div class="rule-copy">
+          <h2>Environment routing targets are explicit</h2>
+          <p>
+            A top-level <code>route</code> or <code>routes</code> declaration does not
+            make the intended target of every named environment obvious. A routed
+            production Worker can coexist with staging or preview environments that
+            should use different hostnames—or stay on <code>workers.dev</code>.
+          </p>
+          <p>
+            FC009 checks routed projects and warns when a named environment declares
+            none of <code>route</code>, <code>routes</code>, or
+            <code>workers_dev</code>. Explicit targets make deploy reviews safer and
+            prevent an environment from silently landing somewhere unintended.
+          </p>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment routing docs ↗</a>
+        </div>
+        <div class="example">
+          <p>EXPLICIT PREVIEW TARGET</p>
+          <pre><code>{
+  "route": "api.example.com/*",
+  "env": {
+    "staging": {
+      "workers_dev": true
+    },
+    "production": {
+      "route": "api.example.com/*"
+    }
+  }
+}</code></pre>
+          <small>Every environment states where it should receive traffic.</small>
+        </div>
+      </article>
+
       <section class="docs-cta">
         <div>
           <p class="kicker">Run the complete inspection</p>
@@ -340,7 +377,7 @@
         </div>
         <div>
           <code>$ npx flarecheck</code>
-          <p>Or focus adoption with <code>--only FC003,FC005,FC008</code>.</p>
+          <p>Or focus adoption with <code>--only FC003,FC005,FC009</code>.</p>
         </div>
       </section>
     </main>

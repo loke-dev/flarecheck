@@ -66,6 +66,7 @@ const RULE_TITLES = {
   FC006: 'Deploy commands select an environment',
   FC007: 'Wrangler uses the recommended JSONC format',
   FC008: 'Production resources are isolated by environment',
+  FC009: 'Environment routing targets are explicit',
 } as const
 
 export const RULES: RuleDefinition[] = [
@@ -111,6 +112,12 @@ export const RULES: RuleDefinition[] = [
     title: RULE_TITLES.FC008,
     helpUri: DOCS.environments,
     check: checkSharedEnvironmentResources,
+  },
+  {
+    id: 'FC009',
+    title: RULE_TITLES.FC009,
+    helpUri: DOCS.environments,
+    check: checkEnvironmentRouting,
   },
 ]
 
@@ -439,6 +446,43 @@ function checkSharedEnvironmentResources({ config, configPath, lineFor }: RuleCo
   }
 
   return result('FC008', title, findings)
+}
+
+function checkEnvironmentRouting({ config, configPath, lineFor }: RuleContext): CheckResult {
+  const title = RULE_TITLES.FC009
+  const environments = asRecord(config.env)
+  const rootHasRoute = config.route !== undefined || config.routes !== undefined
+  if (!environments || !rootHasRoute) return result('FC009', title)
+
+  const findings: Finding[] = []
+  for (const [environmentName, environmentValue] of Object.entries(environments)) {
+    const environment = asRecord(environmentValue)
+    if (
+      !environment ||
+      environment.route !== undefined ||
+      environment.routes !== undefined ||
+      environment.workers_dev !== undefined
+    ) {
+      continue
+    }
+
+    findings.push(
+      finding(
+        'FC009',
+        'warning',
+        `${environmentName} has no explicit route target`,
+        `The root Worker has a route, but env.${environmentName} does not declare route, routes, or workers_dev.`,
+        configPath,
+        {
+          docs: DOCS.environments,
+          line: lineFor(['env', environmentName]),
+          suggestion: `Set the intended route, routes, or workers_dev value inside env.${environmentName}.`,
+        },
+      ),
+    )
+  }
+
+  return result('FC009', title, findings)
 }
 
 function resourceTargets(

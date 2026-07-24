@@ -2,7 +2,7 @@ import { findConfigPaths, loadConfig, loadPackageScripts } from './config.js'
 import { runChecks } from './rules.js'
 import type { Finding, MultiScanResult, ScanResult, Severity } from './types.js'
 
-export const VERSION = '0.8.1'
+export const VERSION = '0.9.0'
 
 const PENALTIES: Record<Severity, number> = {
   error: 20,

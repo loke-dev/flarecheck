@@ -1,0 +1,22 @@
+{
+  "name": "routed-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  },
+  "route": "api.example.com/*",
+  "env": {
+    "production": {
+      "route": "api.example.com/*"
+    },
+    "staging": {
+      "name": "routed-worker-staging"
+    },
+    "preview": {
+      "workers_dev": true
+    }
+  }
+}

@@ -25,7 +25,9 @@ jobs:
       - run: pnpm check
       - run: npm pack
       - name: Create GitHub release
-        run: gh release create "$GITHUB_REF_NAME" flarecheck-*.tgz --verify-tag --generate-notes
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 ||
+            gh release create "$GITHUB_REF_NAME" flarecheck-*.tgz --verify-tag --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Publish to npm
