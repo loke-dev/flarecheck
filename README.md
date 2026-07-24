@@ -2,6 +2,10 @@
 
 Production-readiness checks for Cloudflare Workers projects.
 
+[![npm version](https://img.shields.io/npm/v/flarecheck?color=f04b23)](https://www.npmjs.com/package/flarecheck)
+[![CI](https://github.com/loke-dev/flarecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/loke-dev/flarecheck/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-171816)](LICENSE)
+
 [Website](https://flarecheck.loke.dev) · [Report a finding](https://github.com/loke-dev/flarecheck/issues)
 
 FlareCheck catches Cloudflare configuration risks that builds and type checks
@@ -11,7 +15,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.6.0
+FlareCheck v0.6.1
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100

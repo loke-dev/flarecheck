@@ -1,6 +1,6 @@
 {
   "name": "flarecheck",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Production-readiness checks for Cloudflare Workers projects.",
   "type": "module",
   "bin": {
@@ -26,10 +26,16 @@
   },
   "keywords": [
     "cloudflare",
+    "cloudflare-workers",
     "workers",
     "wrangler",
+    "wrangler-config",
     "lint",
-    "production-readiness"
+    "production-readiness",
+    "github-actions",
+    "sarif",
+    "monorepo",
+    "devtools"
   ],
   "author": "Loke",
   "license": "MIT",
