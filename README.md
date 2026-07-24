@@ -3,10 +3,11 @@
 Production-readiness checks for Cloudflare Workers projects.
 
 [![npm version](https://img.shields.io/npm/v/flarecheck?color=f04b23)](https://www.npmjs.com/package/flarecheck)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-FlareCheck-2088ff?logo=github)](https://github.com/marketplace/actions/flarecheck)
 [![CI](https://github.com/loke-dev/flarecheck/actions/workflows/ci.yml/badge.svg)](https://github.com/loke-dev/flarecheck/actions/workflows/ci.yml)
 [![MIT license](https://img.shields.io/badge/license-MIT-171816)](LICENSE)
 
-[Website](https://flarecheck.loke.dev) · [Report a finding](https://github.com/loke-dev/flarecheck/issues)
+[Website](https://flarecheck.loke.dev) · [GitHub Marketplace](https://github.com/marketplace/actions/flarecheck) · [Report a finding](https://github.com/loke-dev/flarecheck/issues)
 
 FlareCheck catches Cloudflare configuration risks that builds and type checks
 cannot see: committed secrets, non-inherited environment bindings, ambiguous
