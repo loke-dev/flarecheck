@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatGitHub } from '../src/report.js'
+import { formatGitHub, formatSarif } from '../src/report.js'
 import type { ScanResult } from '../src/types.js'
 
 describe('formatGitHub', () => {
@@ -29,6 +29,46 @@ describe('formatGitHub', () => {
     expect(formatGitHub(result, '/repo')).toBe(
       '::notice file=wrangler.jsonc,title=FlareCheck 100/100::No production-readiness findings.\n',
     )
+  })
+})
+
+describe('formatSarif', () => {
+  it('emits SARIF 2.1.0 rules, results, locations, and stable fingerprints', () => {
+    const result = scanResult({
+      findings: [
+        {
+          ruleId: 'FC003',
+          severity: 'error',
+          title: 'Likely secret committed as API_KEY',
+          message: 'vars.API_KEY looks sensitive.',
+          path: '/repo/apps/api/wrangler.jsonc',
+          suggestion: 'Store it as a secret.',
+        },
+      ],
+    })
+
+    const sarif = JSON.parse(formatSarif(result, '/repo'))
+    expect(sarif.version).toBe('2.1.0')
+    expect(sarif.runs[0].tool.driver).toMatchObject({
+      name: 'FlareCheck',
+      semanticVersion: '0.3.0',
+    })
+    expect(sarif.runs[0].tool.driver.rules).toHaveLength(8)
+    expect(sarif.runs[0].results[0]).toMatchObject({
+      ruleId: 'FC003',
+      ruleIndex: 2,
+      level: 'error',
+      message: { text: 'vars.API_KEY looks sensitive. Fix: Store it as a secret.' },
+      locations: [
+        {
+          physicalLocation: {
+            artifactLocation: { uri: 'apps/api/wrangler.jsonc' },
+            region: { startLine: 1 },
+          },
+        },
+      ],
+    })
+    expect(sarif.runs[0].results[0].partialFingerprints['flarecheck/v1']).toHaveLength(64)
   })
 })
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="FlareCheck is the open-source Cloudflare Workers config checker for single projects and monorepos. Find environment drift, committed secrets, unsafe deploy scripts, and missing observability before production."
+      content="FlareCheck is the open-source Cloudflare Workers config checker for projects and monorepos, with GitHub annotations and SARIF code-scanning output."
     />
     <meta name="theme-color" content="#f04b23" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
@@ -36,7 +36,7 @@
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
         "description": "An open-source command-line checker for Cloudflare Workers configuration risks in individual projects and monorepos.",
-        "softwareVersion": "0.5.0",
+        "softwareVersion": "0.6.0",
         "license": "https://opensource.org/license/mit",
         "codeRepository": "https://github.com/loke-dev/flarecheck",
         "author": {
@@ -94,6 +94,14 @@
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "Yes. Run flarecheck with --all to recursively discover every Wrangler configuration and return per-Worker results plus an aggregate summary."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does FlareCheck support SARIF and GitHub Code Scanning?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. The --sarif output produces a SARIF 2.1.0 report with rules, severities, file locations, fixes, and stable fingerprints."
             }
           }
         ]
@@ -196,7 +204,7 @@
         </div>
         <div class="receipt" aria-label="Example terminal output">
           <div class="receipt-top">
-            <span>FLARECHECK / v0.5.0</span>
+            <span>FLARECHECK / v0.6.0</span>
             <span>wrangler.jsonc</span>
           </div>
           <pre><code><span>$</span> flarecheck
@@ -276,6 +284,8 @@ staging is missing d1_databases
           <code>flarecheck --only FC003,FC005</code>
           <p>Scan every Worker in a monorepo</p>
           <code>flarecheck . --all</code>
+          <p>Feed GitHub Code Scanning</p>
+          <code>flarecheck --sarif &gt; flarecheck.sarif</code>
         </div>
       </section>
 
@@ -306,6 +316,10 @@ staging is missing d1_databases
             <details>
               <summary>Can it scan a Workers monorepo?</summary>
               <p>Yes. Run <code>flarecheck . --all</code> to discover every Wrangler configuration recursively and get per-Worker results plus an aggregate summary.</p>
+            </details>
+            <details>
+              <summary>Does it support SARIF and Code Scanning?</summary>
+              <p>Yes. <code>--sarif</code> produces a SARIF 2.1.0 report with rule metadata, severities, file locations, suggested fixes, and stable fingerprints.</p>
             </details>
             <details>
               <summary>Does it replace Wrangler validation?</summary>

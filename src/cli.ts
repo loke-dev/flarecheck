@@ -3,7 +3,13 @@
 import { analyze, analyzeAll, VERSION } from './analyze.js'
 import { ConfigError } from './config.js'
 import { CliArgumentError, parseArgs, wantsJson } from './options.js'
-import { formatGitHub, formatGitHubMany, formatHuman, formatHumanMany } from './report.js'
+import {
+  formatGitHub,
+  formatGitHubMany,
+  formatHuman,
+  formatHumanMany,
+  formatSarif,
+} from './report.js'
 import { RULES } from './rules.js'
 
 async function main(): Promise<void> {
@@ -35,6 +41,8 @@ async function main(): Promise<void> {
       const output =
         options.format === 'json'
           ? `${JSON.stringify(result, null, 2)}\n`
+          : options.format === 'sarif'
+            ? formatSarif(result)
           : options.format === 'github'
             ? formatGitHubMany(result)
             : formatHumanMany(result, options.color)
@@ -47,6 +55,8 @@ async function main(): Promise<void> {
     const output =
       options.format === 'json'
         ? `${JSON.stringify(result, null, 2)}\n`
+        : options.format === 'sarif'
+          ? formatSarif(result)
         : options.format === 'github'
           ? formatGitHub(result)
           : formatHuman(result, options.color)
@@ -80,10 +90,11 @@ Usage:
   flarecheck [path] [options]
 
 Options:
-  --format <human|json|github>
-               Select terminal, JSON, or GitHub Actions output
+  --format <human|json|github|sarif>
+               Select terminal, JSON, GitHub Actions, or SARIF output
   --json       Alias for --format json
   --github     Alias for --format github
+  --sarif      Alias for --format sarif
   --list-rules List every available rule and exit
   --all        Recursively scan every Worker below the path
   --only <ids> Run only comma-separated rule IDs

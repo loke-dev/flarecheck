@@ -18,6 +18,7 @@ describe('parseArgs', () => {
 
   it('supports equals syntax and JSON error detection', () => {
     expect(parseArgs(['--format=json'], false).format).toBe('json')
+    expect(parseArgs(['--sarif'], false).format).toBe('sarif')
     expect(wantsJson(['--format=json'])).toBe(true)
     expect(wantsJson(['--format', 'json'])).toBe(true)
   })

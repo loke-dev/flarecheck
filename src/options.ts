@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 import { RULES } from './rules.js'
 
-export type OutputFormat = 'human' | 'json' | 'github'
+export type OutputFormat = 'human' | 'json' | 'github' | 'sarif'
 
 export interface CliOptions {
   inputPath: string
@@ -25,9 +25,10 @@ export function parseArgs(args: string[], noColor = Boolean(process.env.NO_COLOR
     const arg = args[index]
     if (arg === '--json') format = 'json'
     else if (arg === '--github') format = 'github'
+    else if (arg === '--sarif') format = 'sarif'
     else if (arg === '--format') {
       const value = args[index + 1]
-      if (!value) throw new CliArgumentError('--format requires human, json, or github.')
+      if (!value) throw new CliArgumentError('--format requires human, json, github, or sarif.')
       format = parseFormat(value)
       index += 1
     } else if (arg?.startsWith('--format=')) {
@@ -84,8 +85,8 @@ export function wantsJson(args: string[]): boolean {
 export class CliArgumentError extends Error {}
 
 function parseFormat(value: string): OutputFormat {
-  if (value === 'human' || value === 'json' || value === 'github') return value
-  throw new CliArgumentError(`Unknown output format "${value}". Use human, json, or github.`)
+  if (value === 'human' || value === 'json' || value === 'github' || value === 'sarif') return value
+  throw new CliArgumentError(`Unknown output format "${value}". Use human, json, github, or sarif.`)
 }
 
 function parseRuleIds(value: string): string[] {

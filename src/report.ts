@@ -1,5 +1,8 @@
 import pc from 'picocolors'
-import { relative } from 'node:path'
+import { createHash } from 'node:crypto'
+import { isAbsolute, relative, sep } from 'node:path'
+import { pathToFileURL } from 'node:url'
+import { RULES } from './rules.js'
 import type { Finding, MultiScanResult, ScanResult } from './types.js'
 
 export function formatHuman(result: ScanResult, color = true): string {
@@ -78,6 +81,69 @@ export function formatGitHubMany(result: MultiScanResult, cwd = process.cwd()): 
   return result.projects.map((project) => formatGitHub(project, cwd)).join('')
 }
 
+export function formatSarif(
+  input: ScanResult | MultiScanResult,
+  cwd = process.cwd(),
+): string {
+  const projects = 'projects' in input ? input.projects : [input]
+  const findings = projects.flatMap((project) => project.findings)
+  const ruleIndexes = new Map(RULES.map((rule, index) => [rule.id, index]))
+  const sarif = {
+    $schema: 'https://json.schemastore.org/sarif-2.1.0.json',
+    version: '2.1.0',
+    runs: [
+      {
+        tool: {
+          driver: {
+            name: 'FlareCheck',
+            semanticVersion: input.version,
+            informationUri: 'https://flarecheck.loke.dev/',
+            rules: RULES.map((rule) => ({
+              id: rule.id,
+              shortDescription: { text: rule.title },
+              helpUri: rule.helpUri,
+              properties: {
+                tags: ['cloudflare-workers', 'configuration'],
+              },
+            })),
+          },
+        },
+        results: findings.map((finding) => {
+          const uri = sarifUri(finding.path, cwd)
+          return {
+            ruleId: finding.ruleId,
+            ruleIndex: ruleIndexes.get(finding.ruleId),
+            level: sarifLevel(finding),
+            message: {
+              text: [
+                finding.message,
+                finding.suggestion ? `Fix: ${finding.suggestion}` : undefined,
+              ]
+                .filter(Boolean)
+                .join(' '),
+            },
+            locations: [
+              {
+                physicalLocation: {
+                  artifactLocation: { uri },
+                  region: { startLine: 1 },
+                },
+              },
+            ],
+            partialFingerprints: {
+              'flarecheck/v1': createHash('sha256')
+                .update(`${finding.ruleId}\0${uri}\0${finding.title}`)
+                .digest('hex'),
+            },
+          }
+        }),
+      },
+    ],
+  }
+
+  return `${JSON.stringify(sarif, null, 2)}\n`
+}
+
 function formatFinding(finding: Finding, c: Colors): string[] {
   const icon =
     finding.severity === 'error'
@@ -104,6 +170,20 @@ function formatScore(score: number, c: Colors): string {
 function annotationPath(path: string, cwd: string): string {
   const relativePath = relative(cwd, path)
   return relativePath && !relativePath.startsWith('..') ? relativePath : path
+}
+
+function sarifUri(path: string, cwd: string): string {
+  const relativePath = relative(cwd, path)
+  if (relativePath && !relativePath.startsWith('..') && !isAbsolute(relativePath)) {
+    return relativePath.split(sep).map(encodeURIComponent).join('/')
+  }
+  return pathToFileURL(path).href
+}
+
+function sarifLevel(finding: Finding): 'error' | 'warning' | 'note' {
+  if (finding.severity === 'error') return 'error'
+  if (finding.severity === 'warning') return 'warning'
+  return 'note'
 }
 
 function escapeData(value: string): string {

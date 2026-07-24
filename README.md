@@ -11,7 +11,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.5.0
+FlareCheck v0.6.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -37,6 +37,7 @@ npx flarecheck --strict
 npx flarecheck --list-rules
 npx flarecheck --only FC003,FC005
 npx flarecheck . --all
+npx flarecheck --sarif > flarecheck.sarif
 ```
 
 Exit codes are designed for CI:
@@ -85,6 +86,31 @@ npx flarecheck . --all --json
 
 Human output includes every Worker and an aggregate summary. JSON returns a
 `projects` array, while GitHub output annotates each configuration file.
+
+### Upload results to GitHub Code Scanning
+
+FlareCheck can produce SARIF 2.1.0 for GitHub Code Scanning and compatible
+analysis dashboards:
+
+```yaml
+permissions:
+  contents: read
+  security-events: write
+
+steps:
+  - uses: actions/checkout@v6
+  - name: Generate FlareCheck SARIF
+    run: npx flarecheck --sarif > flarecheck.sarif
+    continue-on-error: true
+  - name: Upload FlareCheck results
+    uses: github/codeql-action/upload-sarif@v4
+    with:
+      sarif_file: flarecheck.sarif
+```
+
+Use `--all --sarif` to combine every Worker in a monorepo into one standards-based
+report. FlareCheck includes rule metadata, severity, file locations, fixes, and
+stable fingerprints.
 
 ## Checks
 

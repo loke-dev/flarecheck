@@ -45,6 +45,7 @@ export interface RuleContext {
 export interface RuleDefinition {
   id: string
   title: string
+  helpUri: string
   check: (context: RuleContext) => CheckResult
 }
 
@@ -65,14 +66,49 @@ const RULE_TITLES = {
 } as const
 
 export const RULES: RuleDefinition[] = [
-  { id: 'FC001', title: RULE_TITLES.FC001, check: checkCompatibilityDate },
-  { id: 'FC002', title: RULE_TITLES.FC002, check: checkNodeCompatibility },
-  { id: 'FC003', title: RULE_TITLES.FC003, check: checkSecretsInVars },
-  { id: 'FC004', title: RULE_TITLES.FC004, check: checkObservability },
-  { id: 'FC005', title: RULE_TITLES.FC005, check: checkEnvironmentBindings },
-  { id: 'FC006', title: RULE_TITLES.FC006, check: checkDeployCommand },
-  { id: 'FC007', title: RULE_TITLES.FC007, check: checkConfigFormat },
-  { id: 'FC008', title: RULE_TITLES.FC008, check: checkSharedEnvironmentResources },
+  {
+    id: 'FC001',
+    title: RULE_TITLES.FC001,
+    helpUri: DOCS.compatibility,
+    check: checkCompatibilityDate,
+  },
+  {
+    id: 'FC002',
+    title: RULE_TITLES.FC002,
+    helpUri: DOCS.bestPractices,
+    check: checkNodeCompatibility,
+  },
+  { id: 'FC003', title: RULE_TITLES.FC003, helpUri: DOCS.secrets, check: checkSecretsInVars },
+  {
+    id: 'FC004',
+    title: RULE_TITLES.FC004,
+    helpUri: DOCS.observability,
+    check: checkObservability,
+  },
+  {
+    id: 'FC005',
+    title: RULE_TITLES.FC005,
+    helpUri: DOCS.environments,
+    check: checkEnvironmentBindings,
+  },
+  {
+    id: 'FC006',
+    title: RULE_TITLES.FC006,
+    helpUri: DOCS.environments,
+    check: checkDeployCommand,
+  },
+  {
+    id: 'FC007',
+    title: RULE_TITLES.FC007,
+    helpUri: DOCS.bestPractices,
+    check: checkConfigFormat,
+  },
+  {
+    id: 'FC008',
+    title: RULE_TITLES.FC008,
+    helpUri: DOCS.environments,
+    check: checkSharedEnvironmentResources,
+  },
 ]
 
 export function runChecks(context: RuleContext, selection: RuleSelection = {}): CheckResult[] {
