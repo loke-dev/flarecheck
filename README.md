@@ -30,17 +30,10 @@ Production readiness: 72/100
 FlareCheck supports `wrangler.jsonc`, `wrangler.json`, and `wrangler.toml`.
 
 ```sh
-npx github:loke-dev/flarecheck
-npx github:loke-dev/flarecheck ./apps/api
-npx github:loke-dev/flarecheck --json
-npx github:loke-dev/flarecheck --strict
-```
-
-The shorter npm command is reserved and will become available after npm
-publication is configured:
-
-```sh
 npx flarecheck
+npx flarecheck ./apps/api
+npx flarecheck --json
+npx flarecheck --strict
 ```
 
 Exit codes are designed for CI:
