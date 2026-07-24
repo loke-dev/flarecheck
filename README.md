@@ -15,7 +15,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.6.1
+FlareCheck v0.7.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -52,15 +52,31 @@ Exit codes are designed for CI:
 
 ### GitHub Actions
 
-Use the GitHub output format to turn findings into file annotations on the
-workflow run:
+Use the reusable action to turn findings into file annotations and fail the
+workflow on errors or warnings:
+
+```yaml
+- uses: actions/checkout@v6
+- uses: loke-dev/flarecheck@v0.7.0
+```
+
+Inputs support focused and monorepo scans:
+
+```yaml
+- uses: loke-dev/flarecheck@v0.7.0
+  with:
+    path: apps
+    all: true
+    only: FC003,FC005,FC008
+```
+
+The action runs the public npm package and accepts `path`, `strict`, `all`,
+`only`, `ignore`, and `version`. To use the CLI directly instead:
 
 ```yaml
 - name: Check Worker configuration
-  run: npx flarecheck --format github --strict
+  run: npx flarecheck --github --strict
 ```
-
-`--github` is a shorter alias for `--format github`.
 
 ### Adopt rules incrementally
 

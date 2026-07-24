@@ -24,3 +24,7 @@ jobs:
       - run: pnpm check
       - name: Check Worker configuration
         run: node dist/cli.js --github --strict
+      - name: Smoke-test the reusable action
+        uses: ./
+        with:
+          version: 0.6.1

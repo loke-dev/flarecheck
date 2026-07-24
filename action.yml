@@ -1,0 +1,54 @@
+name: FlareCheck
+description: Check Cloudflare Workers configuration for production-readiness risks.
+author: Loke
+
+branding:
+  icon: shield
+  color: orange
+
+inputs:
+  path:
+    description: Worker project or monorepo directory to scan.
+    required: false
+    default: .
+  strict:
+    description: Fail the check when warnings are found.
+    required: false
+    default: "true"
+  all:
+    description: Recursively scan every Worker below path.
+    required: false
+    default: "false"
+  only:
+    description: Comma-separated rule IDs to run.
+    required: false
+    default: ""
+  ignore:
+    description: Comma-separated rule IDs to skip.
+    required: false
+    default: ""
+  version:
+    description: FlareCheck npm version to run.
+    required: false
+    default: latest
+
+runs:
+  using: composite
+  steps:
+    - name: Run FlareCheck
+      shell: bash
+      env:
+        FLARECHECK_PATH: ${{ inputs.path }}
+        FLARECHECK_STRICT: ${{ inputs.strict }}
+        FLARECHECK_ALL: ${{ inputs.all }}
+        FLARECHECK_ONLY: ${{ inputs.only }}
+        FLARECHECK_IGNORE: ${{ inputs.ignore }}
+        FLARECHECK_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        args=("$FLARECHECK_PATH" "--github")
+        if [[ "$FLARECHECK_STRICT" == "true" ]]; then args+=("--strict"); fi
+        if [[ "$FLARECHECK_ALL" == "true" ]]; then args+=("--all"); fi
+        if [[ -n "$FLARECHECK_ONLY" ]]; then args+=("--only" "$FLARECHECK_ONLY"); fi
+        if [[ -n "$FLARECHECK_IGNORE" ]]; then args+=("--ignore" "$FLARECHECK_IGNORE"); fi
+        npx --yes "flarecheck@${FLARECHECK_VERSION}" "${args[@]}"

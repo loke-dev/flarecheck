@@ -43,7 +43,7 @@
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
         "description": "An open-source command-line checker for Cloudflare Workers configuration risks in individual projects and monorepos.",
-        "softwareVersion": "0.6.1",
+        "softwareVersion": "0.7.0",
         "license": "https://opensource.org/license/mit",
         "codeRepository": "https://github.com/loke-dev/flarecheck",
         "author": {
@@ -109,6 +109,14 @@
             "acceptedAnswer": {
               "@type": "Answer",
               "text": "Yes. The --sarif output produces a SARIF 2.1.0 report with rules, severities, file locations, fixes, and stable fingerprints."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is FlareCheck available as a GitHub Action?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Add loke-dev/flarecheck to a workflow for file annotations, strict warning handling, monorepo scanning, and rule selection."
             }
           }
         ]
@@ -211,7 +219,7 @@
         </div>
         <div class="receipt" aria-label="Example terminal output">
           <div class="receipt-top">
-            <span>FLARECHECK / v0.6.1</span>
+            <span>FLARECHECK / v0.7.0</span>
             <span>wrangler.jsonc</span>
           </div>
           <pre><code><span>$</span> flarecheck
@@ -293,6 +301,8 @@ staging is missing d1_databases
           <code>flarecheck . --all</code>
           <p>Feed GitHub Code Scanning</p>
           <code>flarecheck --sarif &gt; flarecheck.sarif</code>
+          <p>Use the reusable GitHub Action</p>
+          <code>loke-dev/flarecheck@v0.7.0</code>
         </div>
       </section>
 
@@ -327,6 +337,10 @@ staging is missing d1_databases
             <details>
               <summary>Does it support SARIF and Code Scanning?</summary>
               <p>Yes. <code>--sarif</code> produces a SARIF 2.1.0 report with rule metadata, severities, file locations, suggested fixes, and stable fingerprints.</p>
+            </details>
+            <details>
+              <summary>Is there a reusable GitHub Action?</summary>
+              <p>Yes. Add <code>loke-dev/flarecheck@v0.7.0</code> to a workflow for annotations, strict warnings, monorepo scanning, and rule selection.</p>
             </details>
             <details>
               <summary>Does it replace Wrangler validation?</summary>
