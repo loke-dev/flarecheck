@@ -12,6 +12,7 @@ describe('formatGitHub', () => {
           title: 'staging shares a production D1 database',
           message: 'env.staging.DB points to production.',
           path: '/repo/wrangler.jsonc',
+          line: 14,
           suggestion: 'Use a separate database.',
           docs: 'https://example.com/docs',
         },
@@ -19,7 +20,7 @@ describe('formatGitHub', () => {
     })
 
     expect(formatGitHub(result, '/repo')).toBe(
-      '::warning file=wrangler.jsonc,title=FC008%3A staging shares a production D1 database::env.staging.DB points to production.%0AFix: Use a separate database.%0Ahttps://example.com/docs\n',
+      '::warning file=wrangler.jsonc,line=14,title=FC008%3A staging shares a production D1 database::env.staging.DB points to production.%0AFix: Use a separate database.%0Ahttps://example.com/docs\n',
     )
   })
 
@@ -42,6 +43,7 @@ describe('formatSarif', () => {
           title: 'Likely secret committed as API_KEY',
           message: 'vars.API_KEY looks sensitive.',
           path: '/repo/apps/api/wrangler.jsonc',
+          line: 6,
           suggestion: 'Store it as a secret.',
         },
       ],
@@ -63,7 +65,7 @@ describe('formatSarif', () => {
         {
           physicalLocation: {
             artifactLocation: { uri: 'apps/api/wrangler.jsonc' },
-            region: { startLine: 1 },
+            region: { startLine: 6 },
           },
         },
       ],

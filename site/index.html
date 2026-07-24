@@ -43,7 +43,7 @@
         "applicationCategory": "DeveloperApplication",
         "operatingSystem": "Linux, macOS, Windows",
         "description": "An open-source command-line checker for Cloudflare Workers configuration risks in individual projects and monorepos.",
-        "softwareVersion": "0.7.0",
+        "softwareVersion": "0.8.0",
         "license": "https://opensource.org/license/mit",
         "codeRepository": "https://github.com/loke-dev/flarecheck",
         "author": {
@@ -116,7 +116,7 @@
             "name": "Is FlareCheck available as a GitHub Action?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Yes. Add loke-dev/flarecheck to a workflow for file annotations, strict warning handling, monorepo scanning, and rule selection."
+              "text": "Yes. Add loke-dev/flarecheck to a workflow for precise file and line annotations, strict warning handling, monorepo scanning, and rule selection."
             }
           }
         ]
@@ -219,7 +219,7 @@
         </div>
         <div class="receipt" aria-label="Example terminal output">
           <div class="receipt-top">
-            <span>FLARECHECK / v0.7.0</span>
+            <span>FLARECHECK / v0.8.0</span>
             <span>wrangler.jsonc</span>
           </div>
           <pre><code><span>$</span> flarecheck
@@ -291,7 +291,7 @@ staging is missing d1_databases
           <code>flarecheck --json</code>
           <p>Warnings fail CI</p>
           <code>flarecheck --strict</code>
-          <p>File annotations in Actions</p>
+          <p>Exact file + line annotations</p>
           <code>flarecheck --github --strict</code>
           <p>Discover every stable rule ID</p>
           <code>flarecheck --list-rules</code>
@@ -302,7 +302,7 @@ staging is missing d1_databases
           <p>Feed GitHub Code Scanning</p>
           <code>flarecheck --sarif &gt; flarecheck.sarif</code>
           <p>Use the reusable GitHub Action</p>
-          <code>loke-dev/flarecheck@v0.7.0</code>
+          <code>loke-dev/flarecheck@v0.8.0</code>
         </div>
       </section>
 
@@ -340,7 +340,7 @@ staging is missing d1_databases
             </details>
             <details>
               <summary>Is there a reusable GitHub Action?</summary>
-              <p>Yes. Add <code>loke-dev/flarecheck@v0.7.0</code> to a workflow for annotations, strict warnings, monorepo scanning, and rule selection.</p>
+              <p>Yes. Add <code>loke-dev/flarecheck@v0.8.0</code> to a workflow for exact file and line annotations, strict warnings, monorepo scanning, and rule selection.</p>
             </details>
             <details>
               <summary>Does it replace Wrangler validation?</summary>

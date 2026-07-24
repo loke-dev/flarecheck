@@ -39,6 +39,9 @@ export interface RuleContext {
   config: WorkerConfig
   configPath: string
   scripts: Record<string, string>
+  scriptsPath: string
+  lineFor: (path: Array<string | number>) => number | undefined
+  lineForScript: (name: string) => number | undefined
   now: Date
 }
 
@@ -120,13 +123,14 @@ export function runChecks(context: RuleContext, selection: RuleSelection = {}): 
   )
 }
 
-function checkCompatibilityDate({ config, configPath, now }: RuleContext): CheckResult {
+function checkCompatibilityDate({ config, configPath, lineFor, now }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC001
   const value = config.compatibility_date
   if (typeof value !== 'string') {
     return result('FC001', title, [
       finding('FC001', 'error', 'Missing compatibility date', 'Set compatibility_date explicitly.', configPath, {
         docs: DOCS.compatibility,
+        line: 1,
         suggestion: `Set "compatibility_date" to "${toDateString(now)}".`,
       }),
     ])
@@ -137,6 +141,7 @@ function checkCompatibilityDate({ config, configPath, now }: RuleContext): Check
     return result('FC001', title, [
       finding('FC001', 'error', 'Invalid compatibility date', `"${value}" is not a valid date.`, configPath, {
         docs: DOCS.compatibility,
+        line: lineFor(['compatibility_date']),
         suggestion: `Use the YYYY-MM-DD format, for example "${toDateString(now)}".`,
       }),
     ])
@@ -153,6 +158,7 @@ function checkCompatibilityDate({ config, configPath, now }: RuleContext): Check
         configPath,
         {
           docs: DOCS.compatibility,
+          line: lineFor(['compatibility_date']),
           suggestion: 'Update the date deliberately and run the project test suite.',
         },
       ),
@@ -162,7 +168,7 @@ function checkCompatibilityDate({ config, configPath, now }: RuleContext): Check
   return result('FC001', title)
 }
 
-function checkNodeCompatibility({ config, configPath }: RuleContext): CheckResult {
+function checkNodeCompatibility({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC002
   const flags = Array.isArray(config.compatibility_flags) ? config.compatibility_flags : []
   if (!flags.includes('nodejs_compat')) {
@@ -175,6 +181,7 @@ function checkNodeCompatibility({ config, configPath }: RuleContext): CheckResul
         configPath,
         {
           docs: DOCS.bestPractices,
+          line: lineFor(['compatibility_flags']) ?? 1,
           suggestion: 'Add "nodejs_compat" to compatibility_flags.',
         },
       ),
@@ -183,16 +190,22 @@ function checkNodeCompatibility({ config, configPath }: RuleContext): CheckResul
   return result('FC002', title)
 }
 
-function checkSecretsInVars({ config, configPath }: RuleContext): CheckResult {
+function checkSecretsInVars({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC003
   const findings: Finding[] = []
-  inspectVars(config.vars, 'vars', configPath, findings)
+  inspectVars(config.vars, ['vars'], configPath, lineFor, findings)
 
   const environments = asRecord(config.env)
   if (environments) {
     for (const [environmentName, environmentConfig] of Object.entries(environments)) {
       const environment = asRecord(environmentConfig)
-      inspectVars(environment?.vars, `env.${environmentName}.vars`, configPath, findings)
+      inspectVars(
+        environment?.vars,
+        ['env', environmentName, 'vars'],
+        configPath,
+        lineFor,
+        findings,
+      )
     }
   }
 
@@ -201,8 +214,9 @@ function checkSecretsInVars({ config, configPath }: RuleContext): CheckResult {
 
 function inspectVars(
   value: unknown,
-  path: string,
+  path: string[],
   configPath: string,
+  lineFor: RuleContext['lineFor'],
   findings: Finding[],
 ): void {
   const vars = asRecord(value)
@@ -220,10 +234,11 @@ function inspectVars(
           'FC003',
           'error',
           `Likely secret committed as ${name}`,
-          `${path}.${name} looks sensitive and will be stored in source control.`,
+          `${[...path, name].join('.')} looks sensitive and will be stored in source control.`,
           configPath,
           {
             docs: DOCS.secrets,
+            line: lineFor([...path, name]),
             suggestion: `Remove ${name} from vars and store it with "wrangler secret put ${name}".`,
           },
         ),
@@ -232,7 +247,7 @@ function inspectVars(
   }
 }
 
-function checkObservability({ config, configPath }: RuleContext): CheckResult {
+function checkObservability({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC004
   const observability = asRecord(config.observability)
   if (!observability || observability.enabled !== true) {
@@ -245,6 +260,10 @@ function checkObservability({ config, configPath }: RuleContext): CheckResult {
         configPath,
         {
           docs: DOCS.observability,
+          line:
+            lineFor(['observability', 'enabled']) ??
+            lineFor(['observability']) ??
+            1,
           suggestion: 'Enable observability and choose an intentional head_sampling_rate.',
         },
       ),
@@ -262,6 +281,7 @@ function checkObservability({ config, configPath }: RuleContext): CheckResult {
         configPath,
         {
           docs: DOCS.observability,
+          line: lineFor(['observability', 'head_sampling_rate']),
           suggestion: 'Choose a lower rate intentionally, such as 0.1, after considering traffic.',
         },
       ),
@@ -271,7 +291,7 @@ function checkObservability({ config, configPath }: RuleContext): CheckResult {
   return result('FC004', title)
 }
 
-function checkEnvironmentBindings({ config, configPath }: RuleContext): CheckResult {
+function checkEnvironmentBindings({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC005
   const environments = asRecord(config.env)
   if (!environments || Object.keys(environments).length === 0) return result('FC005', title)
@@ -294,6 +314,7 @@ function checkEnvironmentBindings({ config, configPath }: RuleContext): CheckRes
           configPath,
           {
             docs: DOCS.environments,
+            line: lineFor(['env', environmentName]),
             suggestion: `Declare the intended ${missing.join(', ')} values inside env.${environmentName}.`,
           },
         ),
@@ -304,7 +325,12 @@ function checkEnvironmentBindings({ config, configPath }: RuleContext): CheckRes
   return result('FC005', title, findings)
 }
 
-function checkDeployCommand({ config, configPath, scripts }: RuleContext): CheckResult {
+function checkDeployCommand({
+  config,
+  scripts,
+  scriptsPath,
+  lineForScript,
+}: RuleContext): CheckResult {
   const title = RULE_TITLES.FC006
   const environments = asRecord(config.env)
   if (!environments || Object.keys(environments).length === 0) return result('FC006', title)
@@ -321,9 +347,10 @@ function checkDeployCommand({ config, configPath, scripts }: RuleContext): Check
           'warning',
           `Script "${name}" can deploy the root Worker`,
           `"${command}" does not select one of the configured environments.`,
-          configPath,
+          scriptsPath,
           {
             docs: DOCS.environments,
+            line: lineForScript(name),
             suggestion: 'Add "--env production" or the intended environment explicitly.',
           },
         ),
@@ -346,6 +373,7 @@ function checkConfigFormat({ configPath }: RuleContext): CheckResult {
         configPath,
         {
           docs: DOCS.bestPractices,
+          line: 1,
           suggestion: 'Consider migrating to wrangler.jsonc when it is convenient.',
         },
       ),
@@ -368,7 +396,7 @@ const STATEFUL_RESOURCES: ResourceType[] = [
   { configKey: 'vectorize', identityKey: 'index_name', label: 'Vectorize index' },
 ]
 
-function checkSharedEnvironmentResources({ config, configPath }: RuleContext): CheckResult {
+function checkSharedEnvironmentResources({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC008
   const environments = asRecord(config.env)
   const production = asRecord(environments?.production)
@@ -385,7 +413,7 @@ function checkSharedEnvironmentResources({ config, configPath }: RuleContext): C
       const environmentTargets = resourceTargets(environment[resource.configKey], resource)
 
       for (const [binding, target] of environmentTargets) {
-        if (productionTargets.get(binding) !== target) continue
+        if (productionTargets.get(binding)?.identity !== target.identity) continue
         findings.push(
           finding(
             'FC008',
@@ -395,6 +423,13 @@ function checkSharedEnvironmentResources({ config, configPath }: RuleContext): C
             configPath,
             {
               docs: DOCS.environments,
+              line: lineFor([
+                'env',
+                environmentName,
+                resource.configKey,
+                target.index,
+                resource.identityKey,
+              ]),
               suggestion: `Give env.${environmentName} a separate ${resource.label} and update its ${resource.identityKey}.`,
             },
           ),
@@ -406,16 +441,19 @@ function checkSharedEnvironmentResources({ config, configPath }: RuleContext): C
   return result('FC008', title, findings)
 }
 
-function resourceTargets(value: unknown, type: ResourceType): Map<string, string> {
+function resourceTargets(
+  value: unknown,
+  type: ResourceType,
+): Map<string, { identity: string; index: number }> {
   if (!Array.isArray(value)) return new Map()
 
-  const targets = new Map<string, string>()
-  for (const item of value) {
+  const targets = new Map<string, { identity: string; index: number }>()
+  for (const [index, item] of value.entries()) {
     const resource = asRecord(item)
     const binding = resource?.binding
     const identity = resource?.[type.identityKey]
     if (typeof binding === 'string' && typeof identity === 'string') {
-      targets.set(binding, identity)
+      targets.set(binding, { identity, index })
     }
   }
   return targets
@@ -431,7 +469,7 @@ function finding(
   title: string,
   message: string,
   path: string,
-  optional: Pick<Finding, 'docs' | 'suggestion'> = {},
+  optional: Pick<Finding, 'docs' | 'line' | 'suggestion'> = {},
 ): Finding {
   return { ruleId, severity, title, message, path, ...optional }
 }

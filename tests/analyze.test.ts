@@ -40,6 +40,12 @@ describe('analyze', () => {
     expect(result.findings.find((finding) => finding.ruleId === 'FC003')?.title).toContain(
       'API_KEY',
     )
+    expect(result.findings.find((finding) => finding.ruleId === 'FC003')?.line).toBe(6)
+    expect(result.findings.find((finding) => finding.ruleId === 'FC005')?.line).toBe(17)
+    expect(result.findings.find((finding) => finding.ruleId === 'FC006')).toMatchObject({
+      path: resolve(fixtures, 'risky/package.json'),
+      line: 3,
+    })
   })
 
   it('supports Wrangler TOML and recommends JSONC without failing', async () => {
@@ -48,6 +54,7 @@ describe('analyze', () => {
     expect(result.score).toBe(100)
     expect(result.summary.info).toBe(1)
     expect(result.findings[0]?.ruleId).toBe('FC007')
+    expect(result.findings[0]?.line).toBe(1)
   })
 
   it('finds stateful resources shared with production', async () => {
@@ -64,6 +71,7 @@ describe('analyze', () => {
       ruleId: 'FC008',
       severity: 'warning',
       title: 'staging shares a production D1 database',
+      line: 25,
     })
     expect(result.findings[0]?.message).toContain('env.production')
   })

@@ -2,7 +2,7 @@ import { findConfigPaths, loadConfig, loadPackageScripts } from './config.js'
 import { runChecks } from './rules.js'
 import type { Finding, MultiScanResult, ScanResult, Severity } from './types.js'
 
-export const VERSION = '0.7.0'
+export const VERSION = '0.8.0'
 
 const PENALTIES: Record<Severity, number> = {
   error: 20,
@@ -18,13 +18,16 @@ export async function analyze(
     ignore?: string[] | undefined
   } = {},
 ): Promise<ScanResult> {
-  const { config, configPath, projectRoot } = await loadConfig(inputPath)
-  const scripts = await loadPackageScripts(projectRoot)
+  const { config, configPath, projectRoot, lineFor } = await loadConfig(inputPath)
+  const packageScripts = await loadPackageScripts(projectRoot)
   const checks = runChecks(
     {
       config,
       configPath,
-      scripts,
+      scripts: packageScripts.scripts,
+      scriptsPath: packageScripts.packagePath,
+      lineForScript: packageScripts.lineForScript,
+      lineFor,
       now: options.now ?? new Date(),
     },
     { only: options.only, ignore: options.ignore },

@@ -58,7 +58,8 @@ export function formatGitHub(result: ScanResult, cwd = process.cwd()): string {
         .filter(Boolean)
         .join('\n')
 
-      return `::${command} file=${escapeProperty(file)},title=${escapeProperty(title)}::${escapeData(details)}`
+      const line = finding.line ? `,line=${finding.line}` : ''
+      return `::${command} file=${escapeProperty(file)}${line},title=${escapeProperty(title)}::${escapeData(details)}`
     })
     .join('\n')}\n`
 }
@@ -126,7 +127,7 @@ export function formatSarif(
               {
                 physicalLocation: {
                   artifactLocation: { uri },
-                  region: { startLine: 1 },
+                  region: { startLine: finding.line ?? 1 },
                 },
               },
             ],

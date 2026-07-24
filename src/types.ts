@@ -6,6 +6,7 @@ export interface Finding {
   title: string
   message: string
   path: string
+  line?: number | undefined
   docs?: string
   suggestion?: string
 }

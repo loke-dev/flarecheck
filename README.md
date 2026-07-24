@@ -15,7 +15,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.7.0
+FlareCheck v0.8.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -57,13 +57,13 @@ workflow on errors or warnings:
 
 ```yaml
 - uses: actions/checkout@v6
-- uses: loke-dev/flarecheck@v0.7.0
+- uses: loke-dev/flarecheck@v0.8.0
 ```
 
 Inputs support focused and monorepo scans:
 
 ```yaml
-- uses: loke-dev/flarecheck@v0.7.0
+- uses: loke-dev/flarecheck@v0.8.0
   with:
     path: apps
     all: true
@@ -71,7 +71,8 @@ Inputs support focused and monorepo scans:
 ```
 
 The action runs the public npm package and accepts `path`, `strict`, `all`,
-`only`, `ignore`, and `version`. To use the CLI directly instead:
+`only`, `ignore`, and `version`. Findings point to the relevant Wrangler or
+`package.json` line. To use the CLI directly instead:
 
 ```yaml
 - name: Check Worker configuration

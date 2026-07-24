@@ -1,7 +1,13 @@
 import { readFile, readdir } from 'node:fs/promises'
 import { statSync } from 'node:fs'
 import { resolve, basename, dirname, join } from 'node:path'
-import { parse as parseJsonc, printParseErrorCode, type ParseError } from 'jsonc-parser'
+import {
+  parse as parseJsonc,
+  printParseErrorCode,
+  visit,
+  type JSONPath,
+  type ParseError,
+} from 'jsonc-parser'
 import { parse as parseToml } from 'smol-toml'
 import type { WorkerConfig } from './types.js'
 
@@ -21,6 +27,7 @@ export async function loadConfig(inputPath: string): Promise<{
   config: WorkerConfig
   configPath: string
   projectRoot: string
+  lineFor: (path: JSONPath) => number | undefined
 }> {
   const absolute = resolve(inputPath)
   const inputIsDirectory = statSync(absolute, { throwIfNoEntry: false })?.isDirectory() ?? false
@@ -60,7 +67,10 @@ export async function loadConfig(inputPath: string): Promise<{
     throw new ConfigError(`Expected ${configPath} to contain a configuration object.`)
   }
 
-  return { config: parsed, configPath, projectRoot: dirname(configPath) }
+  const lineFor = configPath.endsWith('.toml')
+    ? createTomlLineResolver(source)
+    : createJsonLineResolver(source)
+  return { config: parsed, configPath, projectRoot: dirname(configPath), lineFor }
 }
 
 function findConfigInDirectory(directory: string): string | undefined {
@@ -113,18 +123,60 @@ export function asRecord(value: unknown): Record<string, unknown> | undefined {
   return isRecord(value) ? value : undefined
 }
 
-export async function loadPackageScripts(projectRoot: string): Promise<Record<string, string>> {
+export async function loadPackageScripts(projectRoot: string): Promise<{
+  scripts: Record<string, string>
+  packagePath: string
+  lineForScript: (name: string) => number | undefined
+}> {
   const packagePath = join(projectRoot, 'package.json')
-  if (!statSync(packagePath, { throwIfNoEntry: false })?.isFile()) return {}
+  const empty = { scripts: {}, packagePath, lineForScript: () => undefined }
+  if (!statSync(packagePath, { throwIfNoEntry: false })?.isFile()) return empty
 
   try {
-    const packageJson: unknown = JSON.parse(await readFile(packagePath, 'utf8'))
+    const source = await readFile(packagePath, 'utf8')
+    const packageJson: unknown = JSON.parse(source)
     const scripts = isRecord(packageJson) ? asRecord(packageJson.scripts) : undefined
-    if (!scripts) return {}
-    return Object.fromEntries(
-      Object.entries(scripts).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
-    )
+    if (!scripts) return empty
+    const lines = createJsonLineResolver(source)
+    return {
+      scripts: Object.fromEntries(
+        Object.entries(scripts).filter(
+          (entry): entry is [string, string] => typeof entry[1] === 'string',
+        ),
+      ),
+      packagePath,
+      lineForScript: (name) => lines(['scripts', name]),
+    }
   } catch {
-    return {}
+    return empty
   }
+}
+
+function createJsonLineResolver(source: string): (path: JSONPath) => number | undefined {
+  const lines = new Map<string, number>()
+  visit(
+    source,
+    {
+      onObjectProperty(property, _offset, _length, startLine, _startCharacter, pathSupplier) {
+        lines.set(pathKey([...pathSupplier(), property]), startLine + 1)
+      },
+    },
+    { allowTrailingComma: true },
+  )
+  return (path) => lines.get(pathKey(path))
+}
+
+function createTomlLineResolver(source: string): (path: JSONPath) => number | undefined {
+  const sourceLines = source.split(/\r?\n/)
+  return (path) => {
+    const property = path.at(-1)
+    if (typeof property !== 'string') return undefined
+    const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const lineIndex = sourceLines.findIndex((line) => new RegExp(`^\\s*${escaped}\\s*=`).test(line))
+    return lineIndex >= 0 ? lineIndex + 1 : undefined
+  }
+}
+
+function pathKey(path: JSONPath): string {
+  return JSON.stringify(path)
 }
