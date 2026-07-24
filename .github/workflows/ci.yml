@@ -22,3 +22,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      - name: Check Worker configuration
+        run: node dist/cli.js --github --strict

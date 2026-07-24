@@ -1,4 +1,5 @@
 import pc from 'picocolors'
+import { relative } from 'node:path'
 import type { Finding, ScanResult } from './types.js'
 
 export function formatHuman(result: ScanResult, color = true): string {
@@ -30,6 +31,35 @@ export function formatHuman(result: ScanResult, color = true): string {
   return lines.join('\n')
 }
 
+export function formatGitHub(result: ScanResult, cwd = process.cwd()): string {
+  if (result.findings.length === 0) {
+    const file = annotationPath(result.configPath, cwd)
+    return `::notice file=${escapeProperty(file)},title=FlareCheck ${result.score}/100::No production-readiness findings.\n`
+  }
+
+  return `${result.findings
+    .map((finding) => {
+      const command =
+        finding.severity === 'error'
+          ? 'error'
+          : finding.severity === 'warning'
+            ? 'warning'
+            : 'notice'
+      const file = annotationPath(finding.path, cwd)
+      const title = `${finding.ruleId}: ${finding.title}`
+      const details = [
+        finding.message,
+        finding.suggestion ? `Fix: ${finding.suggestion}` : undefined,
+        finding.docs,
+      ]
+        .filter(Boolean)
+        .join('\n')
+
+      return `::${command} file=${escapeProperty(file)},title=${escapeProperty(title)}::${escapeData(details)}`
+    })
+    .join('\n')}\n`
+}
+
 function formatFinding(finding: Finding, c: Colors): string[] {
   const icon =
     finding.severity === 'error'
@@ -51,6 +81,19 @@ function formatScore(score: number, c: Colors): string {
   if (score >= 90) return c.green(value)
   if (score >= 70) return c.yellow(value)
   return c.red(value)
+}
+
+function annotationPath(path: string, cwd: string): string {
+  const relativePath = relative(cwd, path)
+  return relativePath && !relativePath.startsWith('..') ? relativePath : path
+}
+
+function escapeData(value: string): string {
+  return value.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A')
+}
+
+function escapeProperty(value: string): string {
+  return escapeData(value).replace(/:/g, '%3A').replace(/,/g, '%2C')
 }
 
 interface Colors {

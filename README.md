@@ -11,7 +11,7 @@ deployment commands, stale compatibility dates, and missing observability.
 ```console
 $ npx flarecheck
 
-FlareCheck v0.2.1
+FlareCheck v0.3.0
 /work/api/wrangler.jsonc
 
 Production readiness: 72/100
@@ -41,6 +41,18 @@ Exit codes are designed for CI:
 - `0`: no errors, and no warnings when `--strict` is enabled
 - `1`: invalid configuration, or warnings with `--strict`
 - `2`: production-readiness errors
+
+### GitHub Actions
+
+Use the GitHub output format to turn findings into file annotations on the
+workflow run:
+
+```yaml
+- name: Check Worker configuration
+  run: npx flarecheck --format github --strict
+```
+
+`--github` is a shorter alias for `--format github`.
 
 ## Checks in v0.2
 

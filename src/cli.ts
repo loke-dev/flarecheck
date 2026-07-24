@@ -1,16 +1,9 @@
 #!/usr/bin/env node
 
-import { resolve } from 'node:path'
 import { analyze, VERSION } from './analyze.js'
 import { ConfigError } from './config.js'
-import { formatHuman } from './report.js'
-
-interface CliOptions {
-  inputPath: string
-  json: boolean
-  strict: boolean
-  color: boolean
-}
+import { CliArgumentError, parseArgs, wantsJson } from './options.js'
+import { formatGitHub, formatHuman } from './report.js'
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
@@ -24,33 +17,27 @@ async function main(): Promise<void> {
     return
   }
 
-  const options = parseArgs(args)
   try {
+    const options = parseArgs(args)
     const result = await analyze(options.inputPath)
-    process.stdout.write(
-      options.json ? `${JSON.stringify(result, null, 2)}\n` : formatHuman(result, options.color),
-    )
+    const output =
+      options.format === 'json'
+        ? `${JSON.stringify(result, null, 2)}\n`
+        : options.format === 'github'
+          ? formatGitHub(result)
+          : formatHuman(result, options.color)
+    process.stdout.write(output)
 
     if (result.summary.errors > 0) process.exitCode = 2
     else if (options.strict && result.summary.warnings > 0) process.exitCode = 1
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    if (options.json) {
+    if (wantsJson(args)) {
       process.stdout.write(`${JSON.stringify({ error: message }, null, 2)}\n`)
     } else {
       process.stderr.write(`FlareCheck: ${message}\n`)
     }
-    process.exitCode = error instanceof ConfigError ? 1 : 2
-  }
-}
-
-function parseArgs(args: string[]): CliOptions {
-  const positional = args.filter((arg) => !arg.startsWith('-'))
-  return {
-    inputPath: resolve(positional[0] ?? '.'),
-    json: args.includes('--json'),
-    strict: args.includes('--strict'),
-    color: !args.includes('--no-color') && !process.env.NO_COLOR,
+    process.exitCode = error instanceof ConfigError || error instanceof CliArgumentError ? 1 : 2
   }
 }
 
@@ -63,7 +50,10 @@ Usage:
   flarecheck [path] [options]
 
 Options:
-  --json       Emit machine-readable JSON
+  --format <human|json|github>
+               Select terminal, JSON, or GitHub Actions output
+  --json       Alias for --format json
+  --github     Alias for --format github
   --strict     Exit with code 1 when warnings are found
   --no-color   Disable ANSI colors
   -v, --version
