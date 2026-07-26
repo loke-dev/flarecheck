@@ -13,7 +13,13 @@ import type { WorkerConfig } from './types.js'
 
 const CONFIG_NAMES = ['wrangler.jsonc', 'wrangler.json', 'wrangler.toml'] as const
 const IGNORED_DIRECTORIES = new Set([
+  '.astro',
   '.git',
+  '.next',
+  '.nuxt',
+  '.output',
+  '.svelte-kit',
+  '.vercel',
   '.wrangler',
   'build',
   'coverage',

@@ -1,4 +1,6 @@
-import { resolve } from 'node:path'
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { analyze, analyzeAll } from '../src/analyze.js'
 
@@ -160,5 +162,29 @@ describe('analyze', () => {
       info: 0,
       passed: 4,
     })
+  })
+
+  it('ignores Wrangler files inside framework build directories', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-generated-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.json'),
+        JSON.stringify({ name: 'source-worker' }),
+      )
+      for (const directory of ['.astro', '.next', '.nuxt', '.output', '.svelte-kit', '.vercel']) {
+        await mkdir(join(temporary, directory), { recursive: true })
+        await writeFile(
+          join(temporary, directory, 'wrangler.json'),
+          JSON.stringify({ name: `generated-${directory}` }),
+        )
+      }
+
+      const result = await analyzeAll(temporary, { now, only: ['FC003'] })
+
+      expect(result.summary.projects).toBe(1)
+      expect(result.projects[0]?.configPath).toBe(join(temporary, 'wrangler.json'))
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
   })
 })

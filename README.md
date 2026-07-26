@@ -98,8 +98,8 @@ accept comma-separated IDs case-insensitively.
 ### Scan a monorepo
 
 Use `--all` to recursively discover and scan every Wrangler configuration below
-a directory. Common generated directories such as `node_modules`, `dist`,
-`build`, `.wrangler`, and `coverage` are skipped.
+a directory. Common generated directories are skipped, including framework
+output from Astro, Next.js, Nuxt, SvelteKit, and Vercel.
 
 ```sh
 npx flarecheck . --all
