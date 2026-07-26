@@ -52,6 +52,8 @@ const BINDING_KEYS = [
 const SECRET_NAME_PATTERN =
   /(^|[_-])(api[_-]?)?(key|secret|token|password|passwd|private[_-]?key|client[_-]?secret|auth|jwt|session[_-]?secret|access[_-]?(token|key))(?:[_-]|$)/i
 const PLACEHOLDER_PATTERN = /^(example|placeholder|replace|changeme|development|local|test|<.+>)$/i
+const WRANGLER_DEPLOY =
+  /(^|\s)(?:wrangler|pnpm\s+exec\s+wrangler|pnpm\s+wrangler|npx\s+--yes\s+wrangler|npx\s+wrangler|yarn\s+wrangler|bunx\s+wrangler)\s+deploy(\s|$)/i
 
 export interface RuleContext {
   config: WorkerConfig
@@ -363,7 +365,7 @@ function checkDeployCommand({
   const findings: Finding[] = []
   for (const [name, command] of Object.entries(scripts)) {
     if (
-      /(^|\s)(wrangler|pnpm\s+wrangler|npx\s+wrangler)\s+deploy(\s|$)/.test(command) &&
+      WRANGLER_DEPLOY.test(command) &&
       !/(--env|-e)(=|\s)/.test(command)
     ) {
       findings.push(

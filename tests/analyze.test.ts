@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -178,6 +178,70 @@ describe('analyze', () => {
       title: 'staging has no explicit route target',
       line: 15,
     })
+  })
+
+  it('warns when pnpm or npx deploy commands do not select an environment', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-deploy-script-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        await readFile(resolve(fixtures, 'risky/wrangler.jsonc'), 'utf8'),
+      )
+      await writeFile(
+        join(temporary, 'package.json'),
+        JSON.stringify({
+          scripts: {
+            deploy: 'pnpm exec wrangler deploy',
+            fallback: 'npx --yes wrangler deploy',
+          },
+        }, null, 2),
+      )
+
+      const result = await analyze(temporary, {
+        now,
+        only: ['FC006'],
+      })
+
+      expect(result.summary.warnings).toBe(2)
+      expect(result.findings[0]).toMatchObject({
+        ruleId: 'FC006',
+        path: join(temporary, 'package.json'),
+      })
+      expect(result.findings[1]).toMatchObject({
+        ruleId: 'FC006',
+        path: join(temporary, 'package.json'),
+      })
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
+  it('does not warn for deploy scripts with explicit environments', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-deploy-env-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        await readFile(resolve(fixtures, 'risky/wrangler.jsonc'), 'utf8'),
+      )
+      await writeFile(
+        join(temporary, 'package.json'),
+        JSON.stringify({
+          scripts: {
+            deploy: 'pnpm exec wrangler deploy --env staging',
+          },
+        }, null, 2),
+      )
+
+      const result = await analyze(temporary, {
+        now,
+        only: ['FC006'],
+      })
+
+      expect(result.summary.warnings).toBe(0)
+      expect(result.findings).toEqual([])
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
   })
 
   it('can run only selected rules', async () => {
