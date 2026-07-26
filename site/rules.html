@@ -166,7 +166,8 @@
             Wrangler <code>vars</code> are plain configuration values and belong in
             source control. Cloudflare explicitly cautions against storing sensitive
             information there. FC003 looks for secret-like names such as API keys,
-            tokens, passwords, and client secrets with non-placeholder values.
+            tokens, auth/session secrets, passwords, and client secrets with
+            non-placeholder values.
           </p>
           <p>
             Remove the value from the configuration, rotate it if it was real, and

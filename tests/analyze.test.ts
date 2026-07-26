@@ -36,9 +36,9 @@ describe('analyze', () => {
   it('finds high-confidence production risks', async () => {
     const result = await analyze(resolve(fixtures, 'risky'), { now })
 
-    expect(result.score).toBe(40)
+    expect(result.score).toBe(0)
     expect(result.summary).toEqual({
-      errors: 1,
+      errors: 3,
       warnings: 5,
       info: 0,
       passed: 3,
@@ -47,6 +47,8 @@ describe('analyze', () => {
       'FC001',
       'FC002',
       'FC003',
+      'FC003',
+      'FC003',
       'FC004',
       'FC005',
       'FC006',
@@ -54,8 +56,10 @@ describe('analyze', () => {
     expect(result.findings.find((finding) => finding.ruleId === 'FC003')?.title).toContain(
       'API_KEY',
     )
+    expect(result.findings.find((finding) => finding.message.includes('AUTH_TOKEN'))?.line).toBe(7)
+    expect(result.findings.find((finding) => finding.message.includes('SESSION_SECRET'))?.line).toBe(8)
     expect(result.findings.find((finding) => finding.ruleId === 'FC003')?.line).toBe(6)
-    expect(result.findings.find((finding) => finding.ruleId === 'FC005')?.line).toBe(17)
+    expect(result.findings.find((finding) => finding.ruleId === 'FC005')?.line).toBe(19)
     expect(result.findings.find((finding) => finding.ruleId === 'FC006')).toMatchObject({
       path: resolve(fixtures, 'risky/package.json'),
       line: 3,
@@ -182,9 +186,14 @@ describe('analyze', () => {
       only: ['FC003', 'FC006'],
     })
 
-    expect(result.findings.map((finding) => finding.ruleId)).toEqual(['FC003', 'FC006'])
+    expect(result.findings.map((finding) => finding.ruleId)).toEqual([
+      'FC003',
+      'FC003',
+      'FC003',
+      'FC006',
+    ])
     expect(result.summary).toEqual({
-      errors: 1,
+      errors: 3,
       warnings: 1,
       info: 0,
       passed: 0,
@@ -214,8 +223,8 @@ describe('analyze', () => {
     ])
     expect(result.summary).toEqual({
       projects: 5,
-      averageScore: 96,
-      errors: 1,
+      averageScore: 88,
+      errors: 3,
       warnings: 0,
       info: 0,
       passed: 4,

@@ -4,6 +4,8 @@
   "compatibility_date": "2025-01-01",
   "vars": {
     "API_KEY": "sk-live-do-not-commit",
+    "AUTH_TOKEN": "token-do-not-commit",
+    "SESSION_SECRET": "session-secret",
     "ENVIRONMENT": "production"
   },
   "d1_databases": [

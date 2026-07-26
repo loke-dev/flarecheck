@@ -50,7 +50,7 @@ const BINDING_KEYS = [
 ] as const
 
 const SECRET_NAME_PATTERN =
-  /(^|_)(api_?)?(key|secret|token|password|passwd|private_?key|client_?secret|auth)(_|$)/i
+  /(^|[_-])(api[_-]?)?(key|secret|token|password|passwd|private[_-]?key|client[_-]?secret|auth|jwt|session[_-]?secret|access[_-]?(token|key))(?:[_-]|$)/i
 const PLACEHOLDER_PATTERN = /^(example|placeholder|replace|changeme|development|local|test|<.+>)$/i
 
 export interface RuleContext {
