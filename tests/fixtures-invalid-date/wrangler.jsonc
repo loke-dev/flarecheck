@@ -1,0 +1,5 @@
+{
+  "name": "invalid-date-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-02-31"
+}

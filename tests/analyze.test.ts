@@ -48,6 +48,28 @@ describe('analyze', () => {
     })
   })
 
+  it('rejects impossible compatibility dates instead of normalizing them', async () => {
+    const result = await analyze(resolve(import.meta.dirname, 'fixtures-invalid-date'), {
+      now,
+      only: ['FC001'],
+    })
+
+    expect(result.score).toBe(80)
+    expect(result.summary).toEqual({
+      errors: 1,
+      warnings: 0,
+      info: 0,
+      passed: 0,
+    })
+    expect(result.findings[0]).toMatchObject({
+      ruleId: 'FC001',
+      severity: 'error',
+      title: 'Invalid compatibility date',
+      line: 4,
+      suggestion: 'Use a real calendar date in YYYY-MM-DD format, for example "2026-07-24".',
+    })
+  })
+
   it('supports Wrangler TOML and recommends JSONC without failing', async () => {
     const result = await analyze(resolve(fixtures, 'toml'), { now })
 

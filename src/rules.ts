@@ -5,7 +5,7 @@ import type { CheckResult, Finding, WorkerConfig } from './types.js'
 const DOCS = {
   bestPractices:
     'https://developers.cloudflare.com/workers/best-practices/workers-best-practices/',
-  compatibility: 'https://developers.cloudflare.com/workers/configuration/compatibility-dates/',
+  compatibility: 'https://developers.cloudflare.com/workers/wrangler/configuration/#inheritable-keys',
   environments: 'https://developers.cloudflare.com/workers/wrangler/environments/',
   observability: 'https://developers.cloudflare.com/workers/observability/logs/workers-logs/',
   secrets: 'https://developers.cloudflare.com/workers/configuration/secrets/',
@@ -143,13 +143,13 @@ function checkCompatibilityDate({ config, configPath, lineFor, now }: RuleContex
     ])
   }
 
-  const parsed = new Date(`${value}T00:00:00Z`)
-  if (Number.isNaN(parsed.valueOf())) {
+  const parsed = parseCompatibilityDate(value)
+  if (!parsed) {
     return result('FC001', title, [
       finding('FC001', 'error', 'Invalid compatibility date', `"${value}" is not a valid date.`, configPath, {
         docs: DOCS.compatibility,
         line: lineFor(['compatibility_date']),
-        suggestion: `Use the YYYY-MM-DD format, for example "${toDateString(now)}".`,
+        suggestion: `Use a real calendar date in YYYY-MM-DD format, for example "${toDateString(now)}".`,
       }),
     ])
   }
@@ -520,6 +520,12 @@ function finding(
 
 function toDateString(date: Date): string {
   return date.toISOString().slice(0, 10)
+}
+
+function parseCompatibilityDate(value: string): Date | undefined {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined
+  const parsed = new Date(`${value}T00:00:00Z`)
+  return !Number.isNaN(parsed.valueOf()) && toDateString(parsed) === value ? parsed : undefined
 }
 
 function startOfUtcDay(date: Date): Date {

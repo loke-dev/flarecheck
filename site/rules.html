@@ -112,10 +112,14 @@
             an intentionally opinionated maintenance signal, not a platform deadline.
           </p>
           <p>
-            A missing or invalid date is an error because the deployed runtime contract
-            is unclear. A stale but valid date is a warning so upgrades remain deliberate.
+            Cloudflare requires a date in <code>yyyy-mm-dd</code> form. FlareCheck
+            also verifies that it is a real calendar date, so values such as
+            <code>2026-02-31</code> fail locally instead of being normalized by
+            JavaScript. A missing or invalid date is an error because the deployed
+            runtime contract is unclear. A stale but valid date is a warning so
+            upgrades remain deliberate.
           </p>
-          <a class="docs-link" href="https://developers.cloudflare.com/workers/configuration/compatibility-dates/">Cloudflare compatibility date docs ↗</a>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/configuration/#inheritable-keys">Cloudflare Wrangler configuration docs ↗</a>
         </div>
         <div class="example">
           <p>WRANGLER.JSONC</p>
