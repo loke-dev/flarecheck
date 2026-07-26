@@ -3,11 +3,23 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { analyze, analyzeAll } from '../src/analyze.js'
+import { ConfigError } from '../src/config.js'
 
 const fixtures = resolve(import.meta.dirname, 'fixtures')
 const now = new Date('2026-07-24T12:00:00Z')
 
 describe('analyze', () => {
+  it('classifies missing single-project paths as configuration errors', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-missing-'))
+    try {
+      await expect(
+        analyze(join(temporary, 'wrangler.jsonc'), { now }),
+      ).rejects.toBeInstanceOf(ConfigError)
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
   it('passes a deliberate production configuration', async () => {
     const result = await analyze(resolve(fixtures, 'healthy'), { now })
 

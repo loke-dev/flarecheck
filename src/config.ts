@@ -36,7 +36,9 @@ export async function loadConfig(inputPath: string): Promise<{
   lineFor: (path: JSONPath) => number | undefined
 }> {
   const absolute = resolve(inputPath)
-  const inputIsDirectory = statSync(absolute, { throwIfNoEntry: false })?.isDirectory() ?? false
+  const input = statSync(absolute, { throwIfNoEntry: false })
+  if (!input) throw new ConfigError(`Path does not exist: ${absolute}`)
+  const inputIsDirectory = input.isDirectory()
   const configPath = inputIsDirectory ? findConfigInDirectory(absolute) : absolute
 
   if (!configPath) {
