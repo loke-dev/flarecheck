@@ -100,6 +100,52 @@ describe('analyze', () => {
     expect(result.findings[0]?.message).toContain('env.production')
   })
 
+  it('tracks current non-inherited bindings without flagging inherited metadata', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-current-bindings-'))
+    try {
+      const currentBindings = [
+        'agent_memory',
+        'ai_search',
+        'ai_search_namespaces',
+        'artifacts',
+        'flagship',
+        'media',
+        'pipelines',
+        'ratelimits',
+        'secrets',
+        'secrets_store_secrets',
+        'send_email',
+        'stream',
+        'streaming_tail_consumers',
+        'tail_consumers',
+        'unsafe',
+        'vpc_networks',
+        'vpc_services',
+        'websearch',
+        'worker_loaders',
+      ]
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        JSON.stringify({
+          name: 'current-bindings',
+          version_metadata: { binding: 'VERSION' },
+          ...Object.fromEntries(currentBindings.map((key) => [key, {}])),
+          env: { staging: {} },
+        }),
+      )
+
+      const result = await analyze(temporary, { now, only: ['FC005'] })
+
+      expect(result.findings).toHaveLength(1)
+      expect(result.findings[0]?.message).toBe(
+        `${currentBindings.join(', ')} are defined at the root but not in env.staging.`,
+      )
+      expect(result.findings[0]?.message).not.toContain('version_metadata')
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
   it('requires explicit targets for routed environments', async () => {
     const result = await analyze(resolve(fixtures, 'routing'), { now })
 

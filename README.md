@@ -145,7 +145,7 @@ stable fingerprints.
 | `FC002` | `nodejs_compat` is enabled |
 | `FC003` | Likely secrets are not committed in `vars` |
 | `FC004` | Workers observability and sampling are intentional |
-| `FC005` | Every environment declares its non-inherited bindings |
+| `FC005` | Every environment declares its non-inherited bindings, including current AI, secrets, streaming, and VPC families |
 | `FC006` | Deployment scripts select a configured environment |
 | `FC007` | Wrangler uses Cloudflare's recommended JSONC format |
 | `FC008` | Non-production environments do not share stateful production resources |
