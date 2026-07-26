@@ -73,7 +73,8 @@ Inputs support focused and monorepo scans:
 
 The action runs the public npm package and accepts `path`, `strict`, `all`,
 `only`, `ignore`, and `version`. Findings point to the relevant Wrangler or
-`package.json` line. To use the CLI directly instead:
+`package.json` line. The `strict` and `all` inputs accept only `true` or `false`
+so configuration mistakes fail visibly. To use the CLI directly instead:
 
 ```yaml
 - name: Check Worker configuration

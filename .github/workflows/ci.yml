@@ -28,3 +28,27 @@ jobs:
         uses: ./
         with:
           version: 0.8.1
+      - name: Reject invalid strict input
+        id: invalid-strict
+        continue-on-error: true
+        uses: ./
+        with:
+          strict: "yes"
+          version: 0.8.1
+      - name: Verify invalid strict input failed
+        if: always()
+        env:
+          ACTION_OUTCOME: ${{ steps.invalid-strict.outcome }}
+        run: test "$ACTION_OUTCOME" = failure
+      - name: Reject invalid all input
+        id: invalid-all
+        continue-on-error: true
+        uses: ./
+        with:
+          all: "yes"
+          version: 0.8.1
+      - name: Verify invalid all input failed
+        if: always()
+        env:
+          ACTION_OUTCOME: ${{ steps.invalid-all.outcome }}
+        run: test "$ACTION_OUTCOME" = failure

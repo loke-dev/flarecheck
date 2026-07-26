@@ -47,8 +47,22 @@ runs:
       run: |
         set -euo pipefail
         args=("$FLARECHECK_PATH" "--github")
-        if [[ "$FLARECHECK_STRICT" == "true" ]]; then args+=("--strict"); fi
-        if [[ "$FLARECHECK_ALL" == "true" ]]; then args+=("--all"); fi
+        case "$FLARECHECK_STRICT" in
+          true) args+=("--strict") ;;
+          false) ;;
+          *)
+            printf '%s\n' "::error title=Invalid FlareCheck input::strict must be true or false"
+            exit 2
+            ;;
+        esac
+        case "$FLARECHECK_ALL" in
+          true) args+=("--all") ;;
+          false) ;;
+          *)
+            printf '%s\n' "::error title=Invalid FlareCheck input::all must be true or false"
+            exit 2
+            ;;
+        esac
         if [[ -n "$FLARECHECK_ONLY" ]]; then args+=("--only" "$FLARECHECK_ONLY"); fi
         if [[ -n "$FLARECHECK_IGNORE" ]]; then args+=("--ignore" "$FLARECHECK_IGNORE"); fi
         npx --yes "flarecheck@${FLARECHECK_VERSION}" "${args[@]}"
