@@ -440,13 +440,17 @@ function checkSharedEnvironmentResources({ config, configPath, lineFor }: RuleCo
       const environmentTargets = resourceTargets(environment[resource.configKey], resource)
 
       for (const [binding, target] of environmentTargets) {
-        if (productionTargets.get(binding)?.identity !== target.identity) continue
+        const productionEntry = [...productionTargets.entries()].find(
+          ([, productionTarget]) => productionTarget.identity === target.identity,
+        )
+        if (!productionEntry) continue
+        const [productionBinding] = productionEntry
         findings.push(
           finding(
             'FC008',
             'warning',
             `${environmentName} shares a production ${resource.label}`,
-            `env.${environmentName}.${resource.configKey} binding "${binding}" points to the same resource as env.production.`,
+            `env.${environmentName}.${resource.configKey} binding "${binding}" points to the same resource as env.production.${resource.configKey} binding "${productionBinding}".`,
             configPath,
             {
               docs: DOCS.environments,

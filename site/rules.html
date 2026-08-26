@@ -317,8 +317,11 @@
             The configuration is valid, but staging traffic can mutate production state.
           </p>
           <p>
-            FC008 compares binding names and resource identity fields between
-            <code>env.production</code> and every other environment. Give each
+            FC008 compares resource identity fields between
+            <code>env.production</code> and every other environment, even when
+            the environments use different binding names. Cloudflare's
+            <a href="https://developers.cloudflare.com/d1/configuration/environments/">D1 environment examples</a>
+            keep the binding name and database ID as separate fields. Give each
             non-production environment its own stateful resource unless sharing is an
             explicit, reviewed choice.
           </p>
@@ -328,11 +331,13 @@
           <p>RISKY TARGET REUSE</p>
           <pre><code>"production": {
   "d1_databases": [{
+    "binding": "DB",
     "database_id": "same-id"
   }]
 },
 "staging": {
   "d1_databases": [{
+    "binding": "STAGING_DB",
     "database_id": "same-id"
   }]
 }</code></pre>

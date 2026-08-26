@@ -148,7 +148,7 @@ stable fingerprints.
 | `FC005` | Every environment declares its non-inherited bindings, including current AI, secrets, streaming, and VPC families |
 | `FC006` | Deployment scripts select a configured environment |
 | `FC007` | Wrangler uses Cloudflare's recommended JSONC format |
-| `FC008` | Non-production environments do not share stateful production resources |
+| `FC008` | Non-production environments do not share stateful production resources, even under different binding names |
 | `FC009` | Routed Workers give every named environment an explicit target |
 
 Rules are deterministic, documented, and designed to favor useful findings over

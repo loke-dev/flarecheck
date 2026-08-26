@@ -116,6 +116,19 @@ describe('analyze', () => {
     expect(result.findings[0]?.message).toContain('env.production')
   })
 
+  it('finds shared stateful resources when environments use different bindings', async () => {
+    const result = await analyze(resolve(fixtures, 'shared-resource-different-bindings'), { now })
+
+    expect(result.findings).toHaveLength(1)
+    expect(result.findings[0]).toMatchObject({
+      ruleId: 'FC008',
+      severity: 'warning',
+      title: 'staging shares a production D1 database',
+      message:
+        'env.staging.d1_databases binding "STAGING_DB" points to the same resource as env.production.d1_databases binding "DB".',
+    })
+  })
+
   it('tracks current non-inherited bindings without flagging inherited metadata', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-current-bindings-'))
     try {
@@ -277,21 +290,22 @@ describe('analyze', () => {
   it('recursively scans every Worker in a directory', async () => {
     const result = await analyzeAll(fixtures, { now, only: ['FC003'] })
 
-    expect(result.summary.projects).toBe(5)
+    expect(result.summary.projects).toBe(6)
     expect(result.projects.map((project) => project.configPath)).toEqual([
       resolve(fixtures, 'healthy/wrangler.jsonc'),
       resolve(fixtures, 'risky/wrangler.jsonc'),
       resolve(fixtures, 'routing/wrangler.jsonc'),
       resolve(fixtures, 'shared-resource/wrangler.jsonc'),
+      resolve(fixtures, 'shared-resource-different-bindings/wrangler.jsonc'),
       resolve(fixtures, 'toml/wrangler.toml'),
     ])
     expect(result.summary).toEqual({
-      projects: 5,
-      averageScore: 88,
+      projects: 6,
+      averageScore: 90,
       errors: 3,
       warnings: 0,
       info: 0,
-      passed: 4,
+      passed: 5,
     })
   })
 
