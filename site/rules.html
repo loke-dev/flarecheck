@@ -261,10 +261,15 @@
             on operator context and is easy to run incorrectly.
           </p>
           <p>
+            Cloudflare also documents the inline
+            <code>CLOUDFLARE_ENV=staging wrangler deploy</code> form. FC006 accepts
+            that assignment when it directly scopes the deploy command; shell state
+            and build-tool environment selection remain outside this static check.
             FC006 points directly to the script line in <code>package.json</code>.
             Make production, staging, and preview commands explicit and reviewable.
           </p>
           <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment selection docs ↗</a>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/system-environment-variables/">Cloudflare system environment variables docs ↗</a>
         </div>
         <div class="example">
           <p>PACKAGE.JSON</p>

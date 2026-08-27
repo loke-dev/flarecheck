@@ -241,6 +241,7 @@ describe('analyze', () => {
         JSON.stringify({
           scripts: {
             deploy: 'pnpm exec wrangler deploy --env staging',
+            inline: 'CLOUDFLARE_ENV=staging wrangler deploy',
           },
         }, null, 2),
       )
