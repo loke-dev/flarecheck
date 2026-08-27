@@ -247,7 +247,7 @@ describe('analyze', () => {
     })
   })
 
-  it('warns when pnpm or npx deploy commands do not select an environment', async () => {
+  it('warns when common deploy commands do not select an environment', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-deploy-script-'))
     try {
       await writeFile(
@@ -260,6 +260,8 @@ describe('analyze', () => {
           scripts: {
             deploy: 'pnpm exec wrangler deploy',
             fallback: 'npx --yes wrangler deploy',
+            npm: 'npm exec -- wrangler deploy',
+            chained: 'echo ready&&wrangler deploy',
           },
         }, null, 2),
       )
@@ -269,7 +271,7 @@ describe('analyze', () => {
         only: ['FC006'],
       })
 
-      expect(result.summary.warnings).toBe(2)
+      expect(result.summary.warnings).toBe(4)
       expect(result.findings[0]).toMatchObject({
         ruleId: 'FC006',
         path: join(temporary, 'package.json'),
