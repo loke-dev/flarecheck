@@ -153,6 +153,9 @@ stable fingerprints.
 
 Rules are deterministic, documented, and designed to favor useful findings over
 volume. FlareCheck never uploads source code or requires Cloudflare credentials.
+For FC008, queue names in `queues.producers` and `queues.consumers` are treated
+as resource identities; see Cloudflare's [Wrangler configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/)
+and [Queues configuration guide](https://developers.cloudflare.com/queues/configuration/configure-queues/).
 
 ## Development
 

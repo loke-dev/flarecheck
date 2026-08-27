@@ -414,12 +414,20 @@ interface ResourceType {
   label: string
 }
 
+interface ResourceTarget {
+  identity: string
+  index: number
+  path?: Array<string | number>
+  reference?: string
+}
+
 const STATEFUL_RESOURCES: ResourceType[] = [
   { configKey: 'd1_databases', identityKey: 'database_id', label: 'D1 database' },
   { configKey: 'kv_namespaces', identityKey: 'id', label: 'KV namespace' },
   { configKey: 'r2_buckets', identityKey: 'bucket_name', label: 'R2 bucket' },
   { configKey: 'hyperdrive', identityKey: 'id', label: 'Hyperdrive configuration' },
   { configKey: 'vectorize', identityKey: 'index_name', label: 'Vectorize index' },
+  { configKey: 'queues', identityKey: 'queue', label: 'Cloudflare queue' },
 ]
 
 function checkSharedEnvironmentResources({ config, configPath, lineFor }: RuleContext): CheckResult {
@@ -444,12 +452,15 @@ function checkSharedEnvironmentResources({ config, configPath, lineFor }: RuleCo
         )
         if (!productionEntry) continue
         const [productionBinding] = productionEntry
+        const currentReference = target.reference ?? `binding "${binding}"`
+        const productionReference =
+          productionEntry[1].reference ?? `binding "${productionBinding}"`
         findings.push(
           finding(
             'FC008',
             'warning',
             `${environmentName} shares a production ${resource.label}`,
-            `env.${environmentName}.${resource.configKey} binding "${binding}" points to the same resource as env.production.${resource.configKey} binding "${productionBinding}".`,
+            `env.${environmentName}.${resource.configKey} ${currentReference} points to the same resource as env.production.${resource.configKey} ${productionReference}.`,
             configPath,
             {
               docs: DOCS.environments,
@@ -457,8 +468,7 @@ function checkSharedEnvironmentResources({ config, configPath, lineFor }: RuleCo
                 'env',
                 environmentName,
                 resource.configKey,
-                target.index,
-                resource.identityKey,
+                ...(target.path ?? [target.index, resource.identityKey]),
               ]),
               suggestion: `Give env.${environmentName} a separate ${resource.label} and update its ${resource.identityKey}.`,
             },
@@ -511,10 +521,11 @@ function checkEnvironmentRouting({ config, configPath, lineFor }: RuleContext): 
 function resourceTargets(
   value: unknown,
   type: ResourceType,
-): Map<string, { identity: string; index: number }> {
+): Map<string, ResourceTarget> {
+  if (type.configKey === 'queues') return queueTargets(value)
   if (!Array.isArray(value)) return new Map()
 
-  const targets = new Map<string, { identity: string; index: number }>()
+  const targets = new Map<string, ResourceTarget>()
   for (const [index, item] of value.entries()) {
     const resource = asRecord(item)
     const binding = resource?.binding
@@ -522,6 +533,39 @@ function resourceTargets(
     if (typeof binding === 'string' && typeof identity === 'string') {
       targets.set(binding, { identity, index })
     }
+  }
+  return targets
+}
+
+function queueTargets(value: unknown): Map<string, ResourceTarget> {
+  const queues = asRecord(value)
+  const targets = new Map<string, ResourceTarget>()
+  const producers = Array.isArray(queues?.producers) ? queues.producers : []
+  for (const [index, item] of producers.entries()) {
+    const producer = asRecord(item)
+    const queue = producer?.queue
+    if (typeof queue !== 'string') continue
+    const binding = producer?.binding
+    targets.set(queue, {
+      identity: queue,
+      index,
+      path: ['producers', index, 'queue'],
+      reference:
+        typeof binding === 'string' ? `producer "${binding}"` : `queue "${queue}"`,
+    })
+  }
+
+  const consumers = Array.isArray(queues?.consumers) ? queues.consumers : []
+  for (const [index, item] of consumers.entries()) {
+    const consumer = asRecord(item)
+    const queue = consumer?.queue
+    if (typeof queue !== 'string' || targets.has(queue)) continue
+    targets.set(queue, {
+      identity: queue,
+      index,
+      path: ['consumers', index, 'queue'],
+      reference: `consumer "${queue}"`,
+    })
   }
   return targets
 }

@@ -321,19 +321,23 @@
           <p>
             Correctly redeclaring bindings is only half the environment problem. A
             staging binding can still point at the same D1 database, KV namespace,
-            R2 bucket, Hyperdrive configuration, or Vectorize index as production.
-            The configuration is valid, but staging traffic can mutate production state.
+            R2 bucket, Hyperdrive configuration, Vectorize index, or Cloudflare queue
+            as production. The configuration is valid, but staging traffic can mutate
+            production state or mix non-production messages into production processing.
           </p>
           <p>
             FC008 compares resource identity fields between
             <code>env.production</code> and every other environment, even when
-            the environments use different binding names. Cloudflare's
+            the environments use different binding names. For queues, it compares
+            queue names in <code>queues.producers</code> and
+            <code>queues.consumers</code>. Cloudflare's
             <a href="https://developers.cloudflare.com/d1/configuration/environments/">D1 environment examples</a>
             keep the binding name and database ID as separate fields. Give each
             non-production environment its own stateful resource unless sharing is an
             explicit, reviewed choice.
           </p>
           <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment isolation docs ↗</a>
+          <a class="docs-link" href="https://developers.cloudflare.com/queues/configuration/configure-queues/">Cloudflare Queues configuration docs ↗</a>
         </div>
         <div class="example example-danger">
           <p>RISKY TARGET REUSE</p>

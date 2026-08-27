@@ -129,6 +129,59 @@ describe('analyze', () => {
     })
   })
 
+  it('finds shared queues while allowing isolated queue resources', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-shared-queues-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        JSON.stringify(
+          {
+            name: 'queue-environments',
+            env: {
+              production: {
+                queues: {
+                  producers: [{ binding: 'EVENTS', queue: 'production-events' }],
+                  consumers: [{ queue: 'production-events' }],
+                },
+              },
+              staging: {
+                queues: {
+                  producers: [{ binding: 'STAGING_EVENTS', queue: 'production-events' }],
+                  consumers: [{ queue: 'production-events' }],
+                },
+              },
+              preview: {
+                queues: {
+                  producers: [{ binding: 'PREVIEW_EVENTS', queue: 'preview-events' }],
+                  consumers: [{ queue: 'preview-events' }],
+                },
+              },
+            },
+          },
+          null,
+          2,
+        ),
+      )
+
+      const result = await analyze(join(temporary, 'wrangler.jsonc'), {
+        now,
+        only: ['FC008'],
+      })
+
+      expect(result.findings).toHaveLength(1)
+      expect(result.findings[0]).toMatchObject({
+        ruleId: 'FC008',
+        severity: 'warning',
+        title: 'staging shares a production Cloudflare queue',
+        message:
+          'env.staging.queues producer "STAGING_EVENTS" points to the same resource as env.production.queues producer "EVENTS".',
+      })
+      expect(result.findings[0]?.line).toBeGreaterThan(0)
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
   it('tracks current non-inherited bindings without flagging inherited metadata', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-current-bindings-'))
     try {
