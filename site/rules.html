@@ -227,9 +227,12 @@
             inside <code>env.staging</code> or <code>env.production</code>.
           </p>
           <p>
+            Wrangler's non-inherited <code>define</code> map also needs an explicit
+            environment value because it controls compile-time substitutions.
             FC005 compares each named environment with root binding categories and
-            reports omissions. The fix is not blind copying: declare the resource
-            intended for that environment, with environment-specific identities.
+            <code>define</code>, then reports omissions. The fix is not blind copying:
+            declare the resource or value intended for that environment, with
+            environment-specific identities where applicable.
           </p>
           <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare Wrangler environments docs ↗</a>
         </div>

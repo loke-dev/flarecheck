@@ -137,6 +137,7 @@ describe('analyze', () => {
         'ai_search',
         'ai_search_namespaces',
         'artifacts',
+        'define',
         'flagship',
         'media',
         'pipelines',

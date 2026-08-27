@@ -20,6 +20,7 @@ const BINDING_KEYS = [
   'artifacts',
   'browser',
   'd1_databases',
+  'define',
   'dispatch_namespaces',
   'durable_objects',
   'flagship',
