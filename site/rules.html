@@ -268,7 +268,9 @@
             <code>CLOUDFLARE_ENV=staging wrangler deploy</code> form. FC006 accepts
             that assignment when it directly scopes the deploy command; shell state
             and build-tool environment selection remain outside this static check.
-            FC006 points directly to the script line in <code>package.json</code>.
+            Each deploy invocation in a chained script is checked independently, so
+            a safe first command cannot hide a later bare deploy. FC006 points
+            directly to the script line in <code>package.json</code>.
             Make production, staging, and preview commands explicit and reviewable.
           </p>
           <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment selection docs ↗</a>
