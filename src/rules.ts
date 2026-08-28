@@ -366,7 +366,8 @@ function checkDeployCommand({
   const findings: Finding[] = []
   for (const [name, command] of Object.entries(scripts)) {
     const deployMatch = WRANGLER_DEPLOY.exec(command)
-    if (deployMatch && !deployMatch[2] && !/(--env|-e)(=|\s)/.test(command)) {
+    const deployCommand = deployMatch ? command.slice(deployMatch.index) : ''
+    if (deployMatch && !deployMatch[2] && !/(--env|-e)(=|\s)/.test(deployCommand)) {
       findings.push(
         finding(
           'FC006',

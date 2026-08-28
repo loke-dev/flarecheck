@@ -262,6 +262,7 @@ describe('analyze', () => {
             fallback: 'npx --yes wrangler deploy',
             npm: 'npm exec -- wrangler deploy',
             chained: 'echo ready&&wrangler deploy',
+            misleading: 'echo --env fake && wrangler deploy',
           },
         }, null, 2),
       )
@@ -271,7 +272,7 @@ describe('analyze', () => {
         only: ['FC006'],
       })
 
-      expect(result.summary.warnings).toBe(4)
+      expect(result.summary.warnings).toBe(5)
       expect(result.findings[0]).toMatchObject({
         ruleId: 'FC006',
         path: join(temporary, 'package.json'),
@@ -280,6 +281,7 @@ describe('analyze', () => {
         ruleId: 'FC006',
         path: join(temporary, 'package.json'),
       })
+      expect(result.findings.some((finding) => finding.message.includes('echo --env fake'))).toBe(true)
     } finally {
       await rm(temporary, { recursive: true })
     }
