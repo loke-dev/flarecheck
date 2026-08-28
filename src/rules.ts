@@ -6,10 +6,13 @@ const DOCS = {
   bestPractices:
     'https://developers.cloudflare.com/workers/best-practices/workers-best-practices/',
   compatibility: 'https://developers.cloudflare.com/workers/wrangler/configuration/#inheritable-keys',
+  compatibilityFlags: 'https://developers.cloudflare.com/workers/configuration/compatibility-flags/',
   environments: 'https://developers.cloudflare.com/workers/wrangler/environments/',
   observability: 'https://developers.cloudflare.com/workers/observability/logs/workers-logs/',
   secrets: 'https://developers.cloudflare.com/workers/configuration/secrets/',
 }
+
+const NODE_COMPATIBILITY_DEFAULT_DATE = new Date('2026-08-04T00:00:00Z')
 
 const BINDING_KEYS = [
   'agent_memory',
@@ -100,7 +103,7 @@ export const RULES: RuleDefinition[] = [
   {
     id: 'FC002',
     title: RULE_TITLES.FC002,
-    helpUri: DOCS.bestPractices,
+    helpUri: DOCS.compatibilityFlags,
     check: checkNodeCompatibility,
   },
   { id: 'FC003', title: RULE_TITLES.FC003, helpUri: DOCS.secrets, check: checkSecretsInVars },
@@ -199,7 +202,14 @@ function checkCompatibilityDate({ config, configPath, lineFor, now }: RuleContex
 function checkNodeCompatibility({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC002
   const flags = Array.isArray(config.compatibility_flags) ? config.compatibility_flags : []
-  if (!flags.includes('nodejs_compat')) {
+  const compatibilityDate =
+    typeof config.compatibility_date === 'string'
+      ? parseCompatibilityDate(config.compatibility_date)
+      : undefined
+  const enabledByDate =
+    compatibilityDate !== undefined && compatibilityDate >= NODE_COMPATIBILITY_DEFAULT_DATE
+
+  if (!flags.includes('nodejs_compat') && !enabledByDate) {
     return result('FC002', title, [
       finding(
         'FC002',
@@ -208,7 +218,7 @@ function checkNodeCompatibility({ config, configPath, lineFor }: RuleContext): C
         'Many packages rely on Node.js built-ins and can fail only after deployment.',
         configPath,
         {
-          docs: DOCS.bestPractices,
+          docs: DOCS.compatibilityFlags,
           line: lineFor(['compatibility_flags']) ?? 1,
           suggestion: 'Add "nodejs_compat" to compatibility_flags.',
         },

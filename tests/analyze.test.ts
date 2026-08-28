@@ -33,6 +33,29 @@ describe('analyze', () => {
     })
   })
 
+  it('uses the compatibility date for the Node.js compatibility default', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-node-compatibility-default-'))
+    const configPath = join(temporary, 'wrangler.jsonc')
+    try {
+      await writeFile(
+        configPath,
+        JSON.stringify({ name: 'before-default', compatibility_date: '2026-08-03' }, null, 2),
+      )
+      const beforeDefault = await analyze(configPath, { now, only: ['FC002'] })
+
+      await writeFile(
+        configPath,
+        JSON.stringify({ name: 'at-default', compatibility_date: '2026-08-04' }, null, 2),
+      )
+      const atDefault = await analyze(configPath, { now, only: ['FC002'] })
+
+      expect(beforeDefault.findings).toHaveLength(1)
+      expect(atDefault.findings).toEqual([])
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
   it('accepts current nested observability streams', async () => {
     const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-nested-observability-'))
     try {

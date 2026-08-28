@@ -142,7 +142,7 @@ stable fingerprints.
 | Rule | Check |
 | --- | --- |
 | `FC001` | Compatibility date exists, is valid, and is not stale |
-| `FC002` | `nodejs_compat` is enabled |
+| `FC002` | Node.js compatibility is enabled |
 | `FC003` | Likely secrets are not committed in `vars` |
 | `FC004` | Workers observability and sampling are intentional |
 | `FC005` | Every environment declares its non-inherited bindings and `define` values, including current AI, secrets, streaming, and VPC families |
@@ -153,6 +153,9 @@ stable fingerprints.
 
 Rules are deterministic, documented, and designed to favor useful findings over
 volume. FlareCheck never uploads source code or requires Cloudflare credentials.
+For FC002, Cloudflare enables Node.js compatibility by default for compatibility
+dates from 2026-08-04 onward; older dates need the explicit flag unless the rule
+is intentionally ignored. See the [Cloudflare compatibility flags documentation](https://developers.cloudflare.com/workers/configuration/compatibility-flags/).
 For FC008, queue names in `queues.producers` and `queues.consumers` are treated
 as resource identities; see Cloudflare's [Wrangler configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/)
 and [Queues configuration guide](https://developers.cloudflare.com/queues/configuration/configure-queues/).

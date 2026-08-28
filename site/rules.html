@@ -141,11 +141,17 @@
             while the deployed Wrangler configuration lacks the flag.
           </p>
           <p>
+            For compatibility dates from <code>2026-08-04</code> onward, Cloudflare
+            enables Node.js compatibility by default. FlareCheck recognizes that
+            platform default; older compatibility dates still need the explicit flag.
+          </p>
+          <p>
             Not every Worker needs Node APIs, so FC002 is a warning. Keep the flag when
             your application or dependency graph relies on supported Node built-ins;
             otherwise ignore this rule explicitly so the decision stays visible.
           </p>
           <a class="docs-link" href="https://developers.cloudflare.com/workers/best-practices/workers-best-practices/">Cloudflare Workers best practices ↗</a>
+          <a class="docs-link" href="https://developers.cloudflare.com/workers/configuration/compatibility-flags/">Cloudflare compatibility flags ↗</a>
         </div>
         <div class="example">
           <p>WRANGLER.JSONC</p>
