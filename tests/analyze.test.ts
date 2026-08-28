@@ -276,6 +276,8 @@ describe('analyze', () => {
         'ai_search',
         'ai_search_namespaces',
         'artifacts',
+        'cloudchamber',
+        'containers',
         'define',
         'flagship',
         'media',
@@ -292,6 +294,8 @@ describe('analyze', () => {
         'vpc_services',
         'websearch',
         'worker_loaders',
+        'workflows',
+        'unsafe_hello_world',
       ]
       await writeFile(
         join(temporary, 'wrangler.jsonc'),

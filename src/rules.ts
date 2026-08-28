@@ -22,6 +22,8 @@ const BINDING_KEYS = [
   'analytics_engine_datasets',
   'artifacts',
   'browser',
+  'cloudchamber',
+  'containers',
   'd1_databases',
   'define',
   'dispatch_namespaces',
@@ -51,6 +53,7 @@ const BINDING_KEYS = [
   'websearch',
   'worker_loaders',
   'workflows',
+  'unsafe_hello_world',
 ] as const
 
 const SECRET_NAME_PATTERN =
