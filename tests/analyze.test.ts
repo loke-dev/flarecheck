@@ -33,6 +33,69 @@ describe('analyze', () => {
     })
   })
 
+  it('accepts current nested observability streams', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-nested-observability-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        JSON.stringify(
+          {
+            name: 'nested-observability',
+            observability: {
+              logs: { enabled: true, head_sampling_rate: 0.1 },
+              traces: { enabled: true, head_sampling_rate: 0.05 },
+            },
+          },
+          null,
+          2,
+        ),
+      )
+
+      const result = await analyze(join(temporary, 'wrangler.jsonc'), {
+        now,
+        only: ['FC004'],
+      })
+
+      expect(result.findings).toEqual([])
+      expect(result.summary).toEqual({
+        errors: 0,
+        warnings: 0,
+        info: 0,
+        passed: 1,
+      })
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
+  it('flags full sampling on a nested observability stream', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-nested-sampling-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        JSON.stringify({
+          name: 'nested-sampling',
+          observability: {
+            logs: { enabled: true, head_sampling_rate: 1 },
+          },
+        }),
+      )
+
+      const result = await analyze(join(temporary, 'wrangler.jsonc'), {
+        now,
+        only: ['FC004'],
+      })
+
+      expect(result.summary.warnings).toBe(1)
+      expect(result.findings[0]).toMatchObject({
+        ruleId: 'FC004',
+        title: 'Observability samples every request',
+      })
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
   it('finds high-confidence production risks', async () => {
     const result = await analyze(resolve(fixtures, 'risky'), { now })
 

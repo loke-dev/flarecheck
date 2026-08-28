@@ -194,8 +194,10 @@
           <p>
             Workers Logs require observability configuration to persist invocation
             logs. Without it, the evidence needed during an incident may be missing.
-            FC004 also flags a 100% head sampling rate: Cloudflare documents that the
-            value controls the percentage of requests logged and can affect volume.
+            Current Wrangler configurations can put observability settings under
+            <code>logs</code> or <code>traces</code>; FC004 accepts those stream-specific
+            blocks as well as the older flat form. It also flags a 100% head sampling
+            rate on an enabled stream because the value can affect telemetry volume.
           </p>
           <p>
             Full sampling can be right for low traffic or short investigations. The
@@ -208,8 +210,10 @@
           <p>WRANGLER.JSONC</p>
           <pre><code>{
   "observability": {
-    "enabled": true,
-    "head_sampling_rate": 0.1
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 0.1
+    }
   }
 }</code></pre>
           <small>Choose a rate that matches traffic and debugging needs.</small>

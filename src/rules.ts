@@ -278,7 +278,12 @@ function inspectVars(
 function checkObservability({ config, configPath, lineFor }: RuleContext): CheckResult {
   const title = RULE_TITLES.FC004
   const observability = asRecord(config.observability)
-  if (!observability || observability.enabled !== true) {
+  const logs = asRecord(observability?.logs)
+  const traces = asRecord(observability?.traces)
+  const hasEnabledStream =
+    observability?.enabled === true || logs?.enabled === true || traces?.enabled === true
+
+  if (!hasEnabledStream) {
     return result('FC004', title, [
       finding(
         'FC004',
@@ -290,6 +295,8 @@ function checkObservability({ config, configPath, lineFor }: RuleContext): Check
           docs: DOCS.observability,
           line:
             lineFor(['observability', 'enabled']) ??
+            lineFor(['observability', 'logs', 'enabled']) ??
+            lineFor(['observability', 'traces', 'enabled']) ??
             lineFor(['observability']) ??
             1,
           suggestion: 'Enable observability and choose an intentional head_sampling_rate.',
@@ -298,8 +305,16 @@ function checkObservability({ config, configPath, lineFor }: RuleContext): Check
     ])
   }
 
-  const samplingRate = observability.head_sampling_rate
-  if (samplingRate === 1) {
+  const samplingPath =
+    observability?.enabled === true && observability.head_sampling_rate === 1
+      ? ['observability', 'head_sampling_rate']
+      : logs?.enabled === true && logs.head_sampling_rate === 1
+        ? ['observability', 'logs', 'head_sampling_rate']
+        : traces?.enabled === true && traces.head_sampling_rate === 1
+          ? ['observability', 'traces', 'head_sampling_rate']
+          : undefined
+
+  if (samplingPath) {
     return result('FC004', title, [
       finding(
         'FC004',
@@ -309,7 +324,7 @@ function checkObservability({ config, configPath, lineFor }: RuleContext): Check
         configPath,
         {
           docs: DOCS.observability,
-          line: lineFor(['observability', 'head_sampling_rate']),
+          line: lineFor(samplingPath),
           suggestion: 'Choose a lower rate intentionally, such as 0.1, after considering traffic.',
         },
       ),
