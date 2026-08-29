@@ -11,6 +11,7 @@ import {
   formatSarif,
 } from './report.js'
 import { RULES } from './rules.js'
+import { terminalText } from './text.js'
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
@@ -67,7 +68,7 @@ async function main(): Promise<void> {
     if (wantsJson(args)) {
       process.stdout.write(`${JSON.stringify({ error: message }, null, 2)}\n`)
     } else {
-      process.stderr.write(`FlareCheck: ${message}\n`)
+      process.stderr.write(`FlareCheck: ${terminalText(message)}\n`)
     }
     process.exitCode = error instanceof ConfigError || error instanceof CliArgumentError ? 1 : 2
   }

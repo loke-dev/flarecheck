@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { isAbsolute, relative, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { RULES } from './rules.js'
+import { terminalText } from './text.js'
 import type { Finding, MultiScanResult, ScanResult } from './types.js'
 
 export function formatHuman(result: ScanResult, color = true): string {
@@ -10,7 +11,7 @@ export function formatHuman(result: ScanResult, color = true): string {
   const lines = [
     '',
     `${c.bold('FlareCheck')} ${c.dim(`v${result.version}`)}`,
-    c.dim(result.configPath),
+    c.dim(terminalText(result.configPath)),
     '',
     `Production readiness: ${formatScore(result.score, c)}`,
     '',
@@ -153,11 +154,11 @@ function formatFinding(finding: Finding, c: Colors): string[] {
         ? c.yellow('! WARNING')
         : c.cyan('i INFO')
   const lines = [
-    `${icon} ${c.dim(finding.ruleId)}  ${c.bold(finding.title)}`,
-    `  ${finding.message}`,
+    `${icon} ${c.dim(terminalText(finding.ruleId))}  ${c.bold(terminalText(finding.title))}`,
+    `  ${terminalText(finding.message)}`,
   ]
-  if (finding.suggestion) lines.push(`  ${c.green('Fix:')} ${finding.suggestion}`)
-  if (finding.docs) lines.push(`  ${c.dim(finding.docs)}`)
+  if (finding.suggestion) lines.push(`  ${c.green('Fix:')} ${terminalText(finding.suggestion)}`)
+  if (finding.docs) lines.push(`  ${c.dim(terminalText(finding.docs))}`)
   return lines
 }
 
@@ -188,7 +189,13 @@ function sarifLevel(finding: Finding): 'error' | 'warning' | 'note' {
 }
 
 function escapeData(value: string): string {
-  return value.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A')
+  return value
+    .replace(/[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f-\u009f]/g, (character) => (
+      `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+    ))
+    .replace(/%/g, '%25')
+    .replace(/\r/g, '%0D')
+    .replace(/\n/g, '%0A')
 }
 
 function escapeProperty(value: string): string {

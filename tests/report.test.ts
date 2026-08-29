@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatGitHub, formatSarif } from '../src/report.js'
+import { formatGitHub, formatHuman, formatSarif } from '../src/report.js'
 import type { ScanResult } from '../src/types.js'
 
 describe('formatGitHub', () => {
@@ -72,6 +72,31 @@ describe('formatSarif', () => {
     })
     expect(sarif.runs[0].results[0].partialFingerprints['flarecheck/v1']).toHaveLength(64)
   })
+})
+
+it('renders configuration control characters visibly', () => {
+  const unsafe = 'api\n\u001b[31mowned'
+  const result = scanResult({
+    configPath: `/repo/${unsafe}.jsonc`,
+    findings: [{
+      ruleId: 'FC003',
+      severity: 'error',
+      title: unsafe,
+      message: `Target ${unsafe} is unsafe.`,
+      path: `/repo/${unsafe}.jsonc`,
+      suggestion: `Remove ${unsafe}.`,
+    }],
+  })
+
+  const human = formatHuman(result, false)
+  const github = formatGitHub(result, '/repo')
+
+  expect(human).toContain('api\\n\\u001b[31mowned')
+  expect(github).toContain('api%0A\\u001b[31mowned')
+  expect(human).not.toContain('\u001b')
+  expect(github).not.toContain('\u001b')
+  expect(human).not.toContain('\nowned')
+  expect(github).not.toContain('\nowned')
 })
 
 function scanResult(overrides: Partial<ScanResult>): ScanResult {
