@@ -354,6 +354,7 @@ describe('analyze', () => {
             chained: 'echo ready&&wrangler deploy',
             misleading: 'echo --env fake && wrangler deploy',
             multiple: 'wrangler deploy --env staging && wrangler deploy',
+            multipleEquals: 'wrangler deploy --env=staging && wrangler deploy',
           },
         }, null, 2),
       )
@@ -363,7 +364,7 @@ describe('analyze', () => {
         only: ['FC006'],
       })
 
-      expect(result.summary.warnings).toBe(6)
+      expect(result.summary.warnings).toBe(7)
       expect(result.findings[0]).toMatchObject({
         ruleId: 'FC006',
         path: join(temporary, 'package.json'),
@@ -375,6 +376,11 @@ describe('analyze', () => {
       expect(result.findings.some((finding) => finding.message.includes('echo --env fake'))).toBe(true)
       expect(
         result.findings.filter((finding) => finding.message.includes('wrangler deploy --env staging && wrangler deploy')),
+      ).toHaveLength(1)
+      expect(
+        result.findings.filter((finding) =>
+          finding.message.includes('wrangler deploy --env=staging && wrangler deploy'),
+        ),
       ).toHaveLength(1)
     } finally {
       await rm(temporary, { recursive: true })
@@ -393,6 +399,7 @@ describe('analyze', () => {
         JSON.stringify({
           scripts: {
             deploy: 'pnpm exec wrangler deploy --env staging',
+            inlineEquals: 'pnpm exec wrangler deploy --env=staging',
             inline: 'CLOUDFLARE_ENV=staging wrangler deploy',
             env: 'env CLOUDFLARE_ENV=staging npx wrangler deploy',
             crossEnv: 'cross-env CLOUDFLARE_ENV=staging wrangler deploy',
