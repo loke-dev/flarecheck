@@ -60,7 +60,7 @@ const SECRET_NAME_PATTERN =
   /(^|[_-])(api[_-]?)?(key|secret|token|password|passwd|private[_-]?key|client[_-]?secret|auth|jwt|session[_-]?secret|access[_-]?(token|key))(?:[_-]|$)/i
 const PLACEHOLDER_PATTERN = /^(example|placeholder|replace|changeme|development|local|test|<.+>)$/i
 const WRANGLER_DEPLOY =
-  /(^|[\s;&|])(?:(CLOUDFLARE_ENV=(?:"[^"]+"|'[^']+'|[^\s;&|]+))\s+)?(?:wrangler|pnpm\s+exec\s+wrangler|pnpm\s+wrangler|npm\s+exec(?:\s+--)?\s+wrangler|npx\s+--yes\s+wrangler|npx\s+wrangler|yarn\s+wrangler|bunx\s+wrangler)\s+deploy(?=\s|$|[;&|])/gi
+  /(^|[\s;&|])(?:(?:env|cross-env)\s+)?(?:(CLOUDFLARE_ENV=(?:"[^"]+"|'[^']+'|[^\s;&|]+))\s+)?(?:wrangler|pnpm\s+exec\s+wrangler|pnpm\s+wrangler|npm\s+exec(?:\s+--)?\s+wrangler|npx\s+--yes\s+wrangler|npx\s+wrangler|yarn\s+wrangler|bunx\s+wrangler)\s+deploy(?=\s|$|[;&|])/gi
 const WRANGLER_ENV_ARGUMENT =
   /(?:^|\s)(?:--env|-e)(?:=|\s+)(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/
 

@@ -394,6 +394,8 @@ describe('analyze', () => {
           scripts: {
             deploy: 'pnpm exec wrangler deploy --env staging',
             inline: 'CLOUDFLARE_ENV=staging wrangler deploy',
+            env: 'env CLOUDFLARE_ENV=staging npx wrangler deploy',
+            crossEnv: 'cross-env CLOUDFLARE_ENV=staging wrangler deploy',
           },
         }, null, 2),
       )
