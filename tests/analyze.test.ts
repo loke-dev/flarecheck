@@ -410,6 +410,39 @@ describe('analyze', () => {
     }
   })
 
+  it('warns for undeclared literal deploy environments', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'flarecheck-deploy-unknown-env-'))
+    try {
+      await writeFile(
+        join(temporary, 'wrangler.jsonc'),
+        await readFile(resolve(fixtures, 'risky/wrangler.jsonc'), 'utf8'),
+      )
+      await writeFile(
+        join(temporary, 'package.json'),
+        JSON.stringify({
+          scripts: {
+            flag: 'wrangler deploy --env production',
+            assignment: 'CLOUDFLARE_ENV=production wrangler deploy',
+            dynamic: 'wrangler deploy --env "$DEPLOY_ENV"',
+            configured: 'wrangler deploy --env staging',
+          },
+        }, null, 2),
+      )
+
+      const result = await analyze(temporary, {
+        now,
+        only: ['FC006'],
+      })
+
+      expect(result.summary.warnings).toBe(2)
+      expect(result.findings).toHaveLength(2)
+      expect(result.findings.every((finding) => finding.title.includes('unknown environment'))).toBe(true)
+      expect(result.findings.every((finding) => finding.message.includes('production'))).toBe(true)
+    } finally {
+      await rm(temporary, { recursive: true })
+    }
+  })
+
   it('can run only selected rules', async () => {
     const result = await analyze(resolve(fixtures, 'risky'), {
       now,

@@ -280,7 +280,10 @@
             and build-tool environment selection remain outside this static check.
             Each deploy invocation in a chained script is checked independently, so
             a safe first command cannot hide a later bare deploy. FC006 points
-            directly to the script line in <code>package.json</code>.
+            directly to the script line in <code>package.json</code> and flags literal
+            environment names that are not declared under <code>env</code>. Dynamic
+            shell variables remain outside static analysis because their value cannot
+            be resolved without running the script.
             Make production, staging, and preview commands explicit and reviewable.
           </p>
           <a class="docs-link" href="https://developers.cloudflare.com/workers/wrangler/environments/">Cloudflare environment selection docs ↗</a>

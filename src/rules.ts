@@ -61,6 +61,8 @@ const SECRET_NAME_PATTERN =
 const PLACEHOLDER_PATTERN = /^(example|placeholder|replace|changeme|development|local|test|<.+>)$/i
 const WRANGLER_DEPLOY =
   /(^|[\s;&|])(?:(CLOUDFLARE_ENV=(?:"[^"]+"|'[^']+'|[^\s;&|]+))\s+)?(?:wrangler|pnpm\s+exec\s+wrangler|pnpm\s+wrangler|npm\s+exec(?:\s+--)?\s+wrangler|npx\s+--yes\s+wrangler|npx\s+wrangler|yarn\s+wrangler|bunx\s+wrangler)\s+deploy(?=\s|$|[;&|])/gi
+const WRANGLER_ENV_ARGUMENT =
+  /(?:^|\s)(?:--env|-e)(?:=|\s+)(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/
 
 export interface RuleContext {
   config: WorkerConfig
@@ -396,18 +398,31 @@ function checkDeployCommand({
     for (const deployMatch of command.matchAll(WRANGLER_DEPLOY)) {
       const commandStart = (deployMatch.index ?? 0) + (deployMatch[1]?.length ?? 0)
       const deployCommand = command.slice(commandStart).split(/[;&|]/, 1)[0] ?? ''
-      if (!deployMatch[2] && !/(--env|-e)(=|\s)/.test(deployCommand)) {
+      const environment = deploymentEnvironment(deployCommand, deployMatch[2])
+      const selectsUnknownEnvironment =
+        environment !== undefined &&
+        !isDynamicShellValue(environment) &&
+        !Object.prototype.hasOwnProperty.call(environments, environment)
+      if (environment === undefined || selectsUnknownEnvironment) {
+        const issueTitle = selectsUnknownEnvironment
+          ? `Script "${name}" selects an unknown environment`
+          : `Script "${name}" can deploy the root Worker`
+        const issueMessage = selectsUnknownEnvironment
+          ? `"${command}" selects "${environment}", but env.${environment} is not declared in the Wrangler configuration.`
+          : `"${command}" does not select one of the configured environments.`
         findings.push(
           finding(
             'FC006',
             'warning',
-            `Script "${name}" can deploy the root Worker`,
-            `"${command}" does not select one of the configured environments.`,
+            issueTitle,
+            issueMessage,
             scriptsPath,
             {
               docs: DOCS.environments,
               line: lineForScript(name),
-              suggestion: 'Add "--env production" or the intended environment explicitly.',
+              suggestion: selectsUnknownEnvironment
+                ? `Use one of the configured environments: ${Object.keys(environments).join(', ')}.`
+                : 'Add "--env production" or the intended environment explicitly.',
             },
           ),
         )
@@ -416,6 +431,18 @@ function checkDeployCommand({
   }
 
   return result('FC006', title, findings)
+}
+
+function deploymentEnvironment(deployCommand: string, assignment?: string): string | undefined {
+  const flag = deployCommand.match(WRANGLER_ENV_ARGUMENT)
+  if (flag) return flag[1] ?? flag[2] ?? flag[3]
+  if (!assignment) return undefined
+  const value = assignment.slice('CLOUDFLARE_ENV='.length)
+  return value.replace(/^("|')(.+)\1$/, '$2')
+}
+
+function isDynamicShellValue(value: string): boolean {
+  return value.includes('$') || value.includes('`')
 }
 
 function checkConfigFormat({ configPath }: RuleContext): CheckResult {
